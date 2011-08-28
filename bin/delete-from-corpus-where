@@ -1,0 +1,47 @@
+#!/usr/bin/env perl
+use 5.14.0;
+use warnings;
+use utf8::all;
+use Anki::Corpus;
+
+my $query = shift
+    or die "usage: $0 query\n";
+
+my $corpus = Anki::Corpus->new(file => $ENV{ANKI_CORPUS});
+my $sth = $corpus->prepare("
+    SELECT rowid, japanese, translation, readings, source, notes
+    FROM sentences
+    WHERE $query
+;");
+$sth->execute;
+
+my $count = 0;
+while (my ($id, $sentence, $translation, $readings, $source, $note) = $sth->fetchrow_array) {
+    ++$count;
+    say "$id: $sentence";
+
+    for (["翻訳", $translation], ["読み", $readings], ["起こり", $source], ["Notes", $note]) {
+        my ($field, $value) = @$_;
+        next if !$value;
+        $value =~ s/\n/\n        /g;
+        say "    $field: $value";
+    }
+
+    print "\n";
+}
+
+if ($count) {
+    $| = 1;
+    print "Are you sure you want to delete these $count rows? [yN] ";
+    exit unless <> =~ /^y/i;
+
+    my $sth = $corpus->prepare("
+        DELETE
+        FROM sentences
+        WHERE $query
+    ;");
+    $sth->execute;
+}
+else {
+    say "No matches.";
+}
