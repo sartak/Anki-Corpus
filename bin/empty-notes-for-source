@@ -1,0 +1,15 @@
+#!/usr/bin/env perl
+use 5.14.0;
+use warnings;
+use utf8::all;
+use Anki::Corpus;
+
+my $source = shift
+    or die "usage: $0 source";
+
+my $corpus = Anki::Corpus->new;
+$corpus->print_each("
+    WHERE source='$source'
+    AND (notes = '' OR notes IS NULL)
+");
+
