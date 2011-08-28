@@ -1,0 +1,28 @@
+#!/usr/bin/env perl
+use 5.14.0;
+use warnings;
+use utf8::all;
+use Anki::Corpus;
+
+my $query = shift
+    or die "usage: $0 query\n";
+
+my $corpus = Anki::Corpus->new(file => $ENV{ANKI_CORPUS});
+my $count = $corpus->print_each("WHERE suspended=1 AND $query");
+
+if ($count) {
+    $| = 1;
+    print "Are you sure you want to unsuspend these $count rows? [yN] ";
+    exit unless <> =~ /^y/i;
+
+    my $sth = $corpus->prepare("
+        UPDATE sentences
+        SET suspended=0
+        WHERE suspended=1 AND $query
+    ;");
+    $sth->execute;
+}
+else {
+    say "No matches.";
+}
+
