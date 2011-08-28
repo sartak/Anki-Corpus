@@ -1,0 +1,46 @@
+#!/usr/bin/env perl
+use 5.14.0;
+use warnings;
+use utf8::all;
+use Anki::Database;
+use Anki::Corpus;
+
+my $ankidir = "$ENV{HOME}/Documents/Anki";
+my $smart_deck = "$ankidir/core2kcore6k.anki";
+my $smart_db = Anki::Database->new(file => $smart_deck);
+my $sth = $smart_db->prepare("
+    select sentence.value, translation.value, readings.value, cards.type
+    from fields as sentence
+        join fields as translation on (translation.factId = sentence.factId)
+        join fields as readings on (readings.factId = sentence.factId)
+        join fieldModels on (sentence.fieldModelId = fieldModels.id)
+        join fieldModels as translationFieldModels on (translation.fieldModelId = translationFieldModels.id)
+        join fieldModels as readingsFieldModels on (readings.fieldModelId = readingsFieldModels.id)
+        join cards on (sentence.factId = cards.factId)
+    where
+        fieldModels.name = 'Expression'
+        and translationFieldModels.name = 'Meaning'
+        and readingsFieldModels.name = 'Reading'
+;");
+$sth->execute;
+
+my $corpus = Anki::Corpus->new(file => $ENV{ANKI_CORPUS});
+
+my $i = 0;
+while (my ($sentence, $translation, $readings, $type) = $sth->fetchrow_array) {
+    die "Unknown type $type for $sentence"
+        unless $type == -1 || $type == 2;
+    my $suspended = ($type == -1 ? 1 : 0);
+
+    $corpus->add_sentence(
+        japanese    => $sentence,
+        translation => $translation,
+        readings    => $readings,
+        source      => 'Smart.fm',
+        suspended   => $suspended,
+
+        # created INTEGER NOT NULL,
+        # unsuspended INTEGER NOT NULL
+    );
+    last if $i++ == 100;
+}
