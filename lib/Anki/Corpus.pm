@@ -93,9 +93,12 @@ sub each_sentence {
     ;");
     $sth->execute;
 
+    my $count = 0;
     while (my @results = $sth->fetchrow_array) {
+        ++$count;
         $sub->(@results);
     }
+    return $count;
 }
 
 sub print_each {
