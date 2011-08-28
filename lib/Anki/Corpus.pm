@@ -68,9 +68,9 @@ sub schematize {
             translation TEXT,
             readings TEXT,
             source TEXT NOT NULL,
-            suspended BOOLEAN DEFAULT 1,
+            suspended BOOLEAN,
             created INTEGER NOT NULL,
-            unsuspended INTEGER NOT NULL,
+            unsuspended INTEGER,
             notes TEXT
         );
     SCHEMA
