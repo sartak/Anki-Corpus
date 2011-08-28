@@ -30,8 +30,10 @@ while ($_) {
         die "Unknown character $1 in: $sentence"
             if $sentence =~ /([^\s\w、「」＜＞・。\-.！？『』（）()〝  〟／‥]<>)/;
 
-        $sentence =~ s/^「// unless $sentence =~ /」$/;
-        $sentence =~ s/」$// unless $sentence =~ /^「/;
+        $sentence =~ s/「//g unless $sentence =~ /」/;
+        $sentence =~ s/」//g unless $sentence =~ /「/;
+        $sentence =~ s/『//g unless $sentence =~ /』/;
+        $sentence =~ s/』//g unless $sentence =~ /『/;
 
         $corpus->add_sentence(
             japanese => $sentence,
