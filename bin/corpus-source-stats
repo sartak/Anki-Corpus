@@ -1,0 +1,29 @@
+#!/usr/bin/env perl
+use 5.14.0;
+use warnings;
+use utf8::all;
+use Anki::Corpus;
+
+my $corpus = Anki::Corpus->new(file => $ENV{ANKI_CORPUS});
+my $sth = $corpus->prepare("
+    SELECT source, suspended, count(japanese)
+    FROM sentences
+    GROUP BY source, suspended
+;");
+$sth->execute;
+
+my %source;
+while (my ($source, $suspended, $count) = $sth->fetchrow_array) {
+    for my $source ($source, 'ALL') {
+        $source{$source}{$suspended ? "s" : "u"} += $count;
+        $source{$source}{c} += $count;
+    }
+}
+
+for my $source (sort { $source{$b}{c} <=> $source{$a}{c} } keys %source) {
+    my $count       = $source{$source}{c} || 0;
+    my $suspended   = $source{$source}{s} || 0;
+    my $unsuspended = $source{$source}{u} || 0;
+
+    say "$source: $count (U:$unsuspended + S:$suspended)";
+}
