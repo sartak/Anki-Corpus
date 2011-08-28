@@ -44,7 +44,7 @@ sub add_sentence {
     });
 
     warn "Length warning (" . length($args{japanese}) . "): $args{japanese}\n"
-        if $args{japanese} > 500;
+        if length($args{japanese}) > 500;
 
     if (!defined($args{unsuspended}) && !$args{suspended}) {
         $args{unsuspended} = time;
