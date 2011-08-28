@@ -38,6 +38,6 @@ while (my ($sentence, $translation, $readings, $type, $created, $modified) = $st
         source      => 'Smart.fm',
         suspended   => $suspended,
         created     => $created,
-        unsuspended => ($suspended ? 0 : $modified),
+        unsuspended => ($suspended ? undef : $modified),
     );
 }

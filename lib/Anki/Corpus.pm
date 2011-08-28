@@ -54,7 +54,7 @@ sub add_sentence {
         $args{source},
         $args{suspended},
         $args{created},
-        $args{suspended},
+        $args{unsuspended},
     );
 }
 
