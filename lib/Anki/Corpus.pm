@@ -114,12 +114,15 @@ sub print_each {
     my $filter      = shift;
     my $color_regex = shift || qr/(?!)/;
 
-    my $count = $self->each_sentence($query, sub {
+    my $count;
+
+    $self->each_sentence($query, sub {
         return if $filter && !$filter->(@_);
 
         my ($id, $sentence, $translation, $readings, $source, $note) = @_;
 
         say "$id: $sentence" =~ s/$color_regex/\e[1;35m$&\e[m/gr;
+        ++$count;
 
         for (["翻訳", $translation], ["読み", $readings], ["起こり", $source], ["Notes", $note]) {
             my ($field, $value) = @$_;
