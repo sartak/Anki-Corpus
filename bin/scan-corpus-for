@@ -10,17 +10,17 @@ my $query = join ' AND ',
 
 my $corpus = Anki::Corpus->new(file => $ENV{ANKI_CORPUS});
 my $sth = $corpus->prepare("
-    SELECT japanese, translation, readings, source
+    SELECT japanese, translation, readings, source, notes
     FROM sentences
     WHERE $query
     AND suspended=1
 ;");
 $sth->execute;
 
-while (my ($sentence, $translation, $readings, $source) = $sth->fetchrow_array) {
+while (my ($sentence, $translation, $readings, $source, $note) = $sth->fetchrow_array) {
     say $sentence;
 
-    for (["翻訳", $translation], ["読み", $readings], ["起こり", $source]) {
+    for (["翻訳", $translation], ["読み", $readings], ["起こり", $source], ["Notes", $note]) {
         my ($field, $value) = @$_;
         next if !$value;
         $value =~ s/\n/\n        /g;
