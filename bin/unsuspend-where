@@ -8,7 +8,7 @@ my $query = shift
     or die "usage: $0 query\n";
 
 my $corpus = Anki::Corpus->new;
-my $count = $corpus->print_each("WHERE suspended=1 AND $query");
+my $count = $corpus->print_each("WHERE suspended=1 AND ($query)");
 my $now = time;
 
 if ($count) {
@@ -19,7 +19,7 @@ if ($count) {
     my $sth = $corpus->prepare("
         UPDATE sentences
         SET suspended=0, unsuspended=$now
-        WHERE suspended=1 AND $query
+        WHERE suspended=1 AND ($query)
     ;");
     $sth->execute;
 }
