@@ -7,7 +7,7 @@ use Anki::Corpus;
 my $query = shift
     or die "usage: $0 query\n";
 
-my $corpus = Anki::Corpus->new(file => $ENV{ANKI_CORPUS});
+my $corpus = Anki::Corpus->new;
 my $count = $corpus->print_each("WHERE suspended=1 AND $query");
 
 if ($count) {

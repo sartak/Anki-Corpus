@@ -8,7 +8,7 @@ my $query = join ' AND ',
             map { $_ =~ s/^-// ? "japanese NOT LIKE '%$_%'" : "japanese LIKE '%$_%'" }
             @ARGV;
 
-my $corpus = Anki::Corpus->new(file => $ENV{ANKI_CORPUS});
+my $corpus = Anki::Corpus->new;
 $corpus->print_each("
     WHERE $query
     AND suspended=1

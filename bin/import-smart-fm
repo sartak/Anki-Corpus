@@ -24,7 +24,7 @@ my $sth = $smart_db->prepare("
 ;");
 $sth->execute;
 
-my $corpus = Anki::Corpus->new(file => $ENV{ANKI_CORPUS});
+my $corpus = Anki::Corpus->new;
 
 while (my ($sentence, $translation, $readings, $type, $created, $modified) = $sth->fetchrow_array) {
     die "Unknown type $type for $sentence"

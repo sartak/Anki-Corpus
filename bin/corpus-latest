@@ -6,7 +6,7 @@ use Anki::Corpus;
 
 my $limit = 10 || shift;
 
-my $corpus = Anki::Corpus->new(file => $ENV{ANKI_CORPUS});
+my $corpus = Anki::Corpus->new;
 $corpus->print_each("
     ORDER BY rowid DESC
     LIMIT $limit

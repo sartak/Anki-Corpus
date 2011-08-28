@@ -7,7 +7,7 @@ use Anki::Corpus;
 my $word = shift
     or die "usage: $0 word\n";
 
-my $corpus = Anki::Corpus->new(file => $ENV{ANKI_CORPUS});
+my $corpus = Anki::Corpus->new;
 while (<STDIN>) {
     next unless /\S/;
     my ($japanese, $translation) = split '｜', $_;

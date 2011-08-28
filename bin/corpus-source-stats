@@ -4,7 +4,7 @@ use warnings;
 use utf8::all;
 use Anki::Corpus;
 
-my $corpus = Anki::Corpus->new(file => $ENV{ANKI_CORPUS});
+my $corpus = Anki::Corpus->new;
 my $sth = $corpus->prepare("
     SELECT source, suspended, count(japanese)
     FROM sentences
