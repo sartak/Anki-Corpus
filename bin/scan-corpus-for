@@ -4,13 +4,21 @@ use warnings;
 use utf8::all;
 use Anki::Corpus;
 
-my $query = join ' AND ',
-            map { $_ =~ s/^-// ? "japanese NOT LIKE '%$_%'" : "japanese LIKE '%$_%'" }
-            @ARGV;
+die "usage: $0 query\n" unless @ARGV;
+my $query;
+my $regex = '(?!)';
+for my $clause (@ARGV) {
+    if ($clause =~ s/^-//) {
+        $query .= " AND japanese NOT LIKE '%$clause%'"
+    }
+    else {
+        $query .= " AND japanese LIKE '%$clause%'";
+        $regex .= "|\Q$clause\E";
+    }
+}
 
 my $corpus = Anki::Corpus->new;
 $corpus->print_each("
-    WHERE $query
-    AND suspended=1
-;");
+    WHERE suspended=1 $query
+;", sub { 1 }, $regex);
 
