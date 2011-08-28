@@ -1,5 +1,7 @@
 package Anki::Corpus;
 use 5.14.0;
+use warnings;
+use utf8;
 use Any::Moose;
 use DBI;
 use Params::Validate 'validate';
@@ -43,6 +45,10 @@ sub add_sentence {
         unsuspended => { default => undef },
         notes       => { default => undef },
     });
+
+    if ($args{japanese} =~ s/。$//) {
+        warn "Truncated 。 giving $args{japanese}\n";
+    }
 
     warn "Length warning (" . length($args{japanese}) . "): $args{japanese}\n"
         if length($args{japanese}) > 500;
