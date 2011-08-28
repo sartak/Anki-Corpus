@@ -50,6 +50,12 @@ sub add_sentence {
         $args{unsuspended} = time;
     }
 
+    my $old_warn = $SIG{__WARN__} = sub { warn shift };
+    local $SIG{__WARN__} = sub {
+        my $warning = shift;
+        $old_warn->($warning, @_) unless $warning =~ /column japanese is not unique/;
+    };
+
     my $dbh = $self->dbh;
     $dbh->do("INSERT INTO sentences (japanese, translation, readings, source, suspended, created, unsuspended, notes) values (?, ?, ?, ?, ?, ?, ?, ?);", {},
         $args{japanese},
