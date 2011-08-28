@@ -12,7 +12,7 @@ my $count = $corpus->print_each("WHERE $query");
 
 if ($count) {
     $| = 1;
-    print "Are you sure you want to delete these $count rows? [yN] ";
+    print "Are you sure you want to delete? [yN] ";
     exit unless <> =~ /^y/i;
 
     my $sth = $corpus->prepare("

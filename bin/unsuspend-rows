@@ -14,7 +14,7 @@ my $now = time;
 
 if ($count) {
     $| = 1;
-    print "Are you sure you want to unsuspend these $count rows? [yN] ";
+    print "Are you sure you want to unsuspend? [yN] ";
     exit unless <> =~ /^y/i;
 
     my $sth = $corpus->prepare("
