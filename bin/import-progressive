@@ -4,7 +4,8 @@ use warnings;
 use utf8::all;
 use Anki::Corpus;
 
-my $word = shift;
+my $word = shift
+    or die "usage: $0 word\n";
 
 my $corpus = Anki::Corpus->new(file => $ENV{ANKI_CORPUS});
 while (<STDIN>) {
@@ -18,6 +19,6 @@ while (<STDIN>) {
         japanese    => $japanese,
         translation => $translation,
         source      => 'プログレッシブ英和・和英中辞典',
-        ($word ? (notes => $word) : ()),
+        notes       => $word,
     );
 }
