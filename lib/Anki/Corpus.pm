@@ -43,6 +43,9 @@ sub add_sentence {
         notes       => { default => undef },
     });
 
+    warn "Length warning (" . length($args{japanese}) . "): $args{japanese}\n"
+        if $args{japanese} > 500;
+
     if (!defined($args{unsuspended}) && !$args{suspended}) {
         $args{unsuspended} = time;
     }
