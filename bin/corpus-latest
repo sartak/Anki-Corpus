@@ -1,0 +1,30 @@
+#!/usr/bin/env perl
+use 5.14.0;
+use warnings;
+use utf8::all;
+use Anki::Corpus;
+
+my $limit = 10 || shift;
+
+my $corpus = Anki::Corpus->new(file => $ENV{ANKI_CORPUS});
+my $sth = $corpus->prepare("
+    SELECT rowid, japanese, translation, readings, source, notes
+    FROM sentences
+    ORDER BY created DESC
+    LIMIT $limit
+;");
+$sth->execute;
+
+while (my ($id, $sentence, $translation, $readings, $source, $note) = $sth->fetchrow_array) {
+    say "$id: $sentence";
+
+    for (["翻訳", $translation], ["読み", $readings], ["起こり", $source], ["Notes", $note]) {
+        my ($field, $value) = @$_;
+        next if !$value;
+        $value =~ s/\n/\n        /g;
+        say "    $field: $value";
+    }
+
+    print "\n";
+}
+
