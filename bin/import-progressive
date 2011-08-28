@@ -9,7 +9,14 @@ my $word = shift
 
 my $corpus = Anki::Corpus->new(file => $ENV{ANKI_CORPUS});
 while (<STDIN>) {
+    next unless /\S/;
     my ($japanese, $translation) = split '｜', $_;
+
+    unless ($japanese && $translation) {
+        warn "Oddly formatted progressive line: $_\n";
+        next;
+    }
+
     for ($japanese, $translation) {
         s/^\s+//;
         s/\s+$//;
