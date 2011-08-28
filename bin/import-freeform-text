@@ -1,0 +1,48 @@
+#!/usr/bin/env perl
+use 5.14.0;
+use warnings;
+use utf8::all;
+use Anki::Corpus;
+
+my $source = shift
+    or die "usage: $0 source\n";
+
+my $corpus = Anki::Corpus->new;
+$_ = join "\n", <STDIN>;
+s/[\n\r]+/\n/g;
+
+my $prev_length = 0;
+my $e = 0;
+my $i = 0;
+
+while ($_) {
+    if ($prev_length == length) {
+        die "Did not parse: " . substr($_, 0, 50);
+    }
+    $prev_length = length;
+
+    next if s/\A[\s\n]+//;
+
+    if (s/\A(.*?([。？！?!]|$))//m) {
+        my $sentence = $1;
+        next unless $sentence =~ /\p{Han}|\p{Hiragana}|\p{Katakana}/;
+
+        die "Unknown character $1 in: $sentence"
+            if $sentence =~ /([^\s\w、「」＜＞・。\-.！？『』（）()〝  〟／‥]<>)/;
+
+        $sentence =~ s/^「// unless $sentence =~ /」$/;
+        $sentence =~ s/」$// unless $sentence =~ /^「/;
+
+        $corpus->add_sentence(
+            japanese => $sentence,
+            source   => $source,
+        );
+
+        say 2**$e++ if ++$i == 2**$e;
+
+        next;
+    }
+
+    die "Did not parse: " . substr($_, 0, 50);
+}
+
