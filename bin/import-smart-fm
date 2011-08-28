@@ -31,6 +31,10 @@ while (my ($sentence, $translation, $readings, $type, $created, $modified) = $st
         unless $type == -1 || $type == 2;
     my $suspended = ($type == -1 ? 1 : 0);
 
+    for ($sentence, $translation, $readings) {
+        s/<br[^>]*>/\n/g;
+    }
+
     $corpus->add_sentence(
         japanese    => $sentence,
         translation => $translation,
