@@ -1,0 +1,20 @@
+#!/usr/bin/env perl
+use 5.14.0;
+use warnings;
+use utf8::all;
+use Anki::Corpus;
+
+my $corpus = Anki::Corpus->new(file => $ENV{ANKI_CORPUS});
+while (<STDIN>) {
+    my ($japanese, $translation) = split '｜', $_;
+    for ($japanese, $translation) {
+        s/^\s+//;
+        s/\s+$//;
+    }
+
+    $corpus->add_sentence(
+        japanese    => $japanese,
+        translation => $translation,
+        source      => 'プログレッシブ英和・和英中辞典',
+    );
+}
