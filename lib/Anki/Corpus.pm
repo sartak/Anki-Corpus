@@ -81,5 +81,41 @@ sub schematize {
     SCHEMA
 }
 
+sub each_sentence {
+    my $self  = shift;
+    my $query = shift;
+    my $sub   = shift;
+
+    my $sth = $self->prepare("
+        SELECT rowid, japanese, translation, readings, source, notes
+        FROM sentences
+        $query
+    ;");
+    $sth->execute;
+
+    while (my @results = $sth->fetchrow_array) {
+        $sub->(@results);
+    }
+}
+
+sub print_each {
+    my $self  = shift;
+    my $query = shift;
+
+    $self->each_sentence($query, sub {
+        my ($id, $sentence, $translation, $readings, $source, $note) = @_;
+        print "$id: $sentence\n";
+
+        for (["翻訳", $translation], ["読み", $readings], ["起こり", $source], ["Notes", $note]) {
+            my ($field, $value) = @$_;
+            next if !$value;
+            $value =~ s/\n/\n        /g;
+            print "    $field: $value\n";
+        }
+
+        print "\n";
+    });
+}
+
 1;
 
