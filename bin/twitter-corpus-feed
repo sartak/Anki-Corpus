@@ -1,0 +1,33 @@
+#!/usr/bin/env perl
+use 5.14.0;
+use warnings;
+use utf8::all;
+use Anki::Corpus;
+use Net::Twitter;
+use YAML 'LoadFile';
+
+my $corpus = Anki::Corpus->new;
+
+my $twitter = Net::Twitter->new(
+    %{ LoadFile("$ENV{HOME}/.twitter-corpus-auth") },
+    traits => [qw/API::REST InflateObjects/],
+);
+my $statuses = $twitter->friends_timeline({ count => 200, include_rts => 0 });
+
+for my $status (reverse @$statuses) {
+    my $user = $status->user->screen_name;
+    my $text = $status->text;
+
+    # my japanese is not worth imitating
+    next if lc($user) eq 'sartak';
+
+    # try to find just japanese (not chinese)
+    next unless $text =~ /\p{Hiragana}|\p{Katakana}/;
+
+    $corpus->add_sentence(
+        japanese => $text,
+        source   => 'Twitter',
+        notes    => $user,
+    );
+}
+
