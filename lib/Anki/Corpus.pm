@@ -102,11 +102,15 @@ sub each_sentence {
 }
 
 sub print_each {
-    my $self  = shift;
-    my $query = shift;
+    my $self   = shift;
+    my $query  = shift;
+    my $filter = shift;
 
     $self->each_sentence($query, sub {
+        return if $filter && !$filter->(@_);
+
         my ($id, $sentence, $translation, $readings, $source, $note) = @_;
+
         print "$id: $sentence\n";
 
         for (["翻訳", $translation], ["読み", $readings], ["起こり", $source], ["Notes", $note]) {
