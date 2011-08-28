@@ -40,6 +40,7 @@ sub add_sentence {
         suspended   => { default => 1, regex => qr/\A[01]\z/ },
         created     => { default => time },
         unsuspended => { default => undef },
+        notes       => { default => undef },
     });
 
     if (!defined($args{unsuspended}) && !$args{suspended}) {
@@ -47,7 +48,7 @@ sub add_sentence {
     }
 
     my $dbh = $self->dbh;
-    $dbh->do("INSERT INTO sentences (japanese, translation, readings, source, suspended, created, unsuspended) values (?, ?, ?, ?, ?, ?, ?);", {},
+    $dbh->do("INSERT INTO sentences (japanese, translation, readings, source, suspended, created, unsuspended, notes) values (?, ?, ?, ?, ?, ?, ?, ?);", {},
         $args{japanese},
         $args{translation},
         $args{readings},
@@ -55,6 +56,7 @@ sub add_sentence {
         $args{suspended},
         $args{created},
         $args{unsuspended},
+        $args{notes},
     );
 }
 
