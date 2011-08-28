@@ -114,7 +114,7 @@ sub print_each {
     my $filter      = shift;
     my $color_regex = shift || qr/(?!)/;
 
-    $self->each_sentence($query, sub {
+    my $count = $self->each_sentence($query, sub {
         return if $filter && !$filter->(@_);
 
         my ($id, $sentence, $translation, $readings, $source, $note) = @_;
@@ -130,6 +130,14 @@ sub print_each {
 
         say "";
     });
+
+    if ($count) {
+        print "$count row";
+        print "s" if $count != 1;
+        print "\n";
+    }
+
+    return $count;
 }
 
 1;
