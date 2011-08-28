@@ -1,0 +1,31 @@
+#!/usr/bin/env perl
+use 5.14.0;
+use warnings;
+use utf8::all;
+use Anki::Corpus;
+
+my $query = join ' AND ',
+            map { $_ =~ s/^-// ? "japanese NOT LIKE '%$_%'" : "japanese LIKE '%$_%'" }
+            @ARGV;
+
+my $corpus = Anki::Corpus->new(file => $ENV{ANKI_CORPUS});
+my $sth = $corpus->prepare("
+    SELECT japanese, translation, readings, source
+    FROM sentences
+    WHERE $query
+    AND suspended=1
+;");
+$sth->execute;
+
+while (my ($sentence, $translation, $readings, $source) = $sth->fetchrow_array) {
+    say $sentence;
+
+    for (["翻訳", $translation], ["読み", $readings], ["起こり", $source]) {
+        my ($field, $value) = @$_;
+        next if !$value;
+        $value =~ s/\n/\n        /g;
+        say "    $field: $value";
+    }
+
+    print "\n";
+}
