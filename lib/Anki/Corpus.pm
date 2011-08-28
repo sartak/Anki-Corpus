@@ -1,4 +1,5 @@
 package Anki::Corpus;
+use 5.14.0;
 use Any::Moose;
 use DBI;
 use Params::Validate 'validate';
@@ -108,25 +109,26 @@ sub each_sentence {
 }
 
 sub print_each {
-    my $self   = shift;
-    my $query  = shift;
-    my $filter = shift;
+    my $self        = shift;
+    my $query       = shift;
+    my $filter      = shift;
+    my $color_regex = shift || qr/(?!)/;
 
     $self->each_sentence($query, sub {
         return if $filter && !$filter->(@_);
 
         my ($id, $sentence, $translation, $readings, $source, $note) = @_;
 
-        print "$id: $sentence\n";
+        say "$id: $sentence" =~ s/$color_regex/\e[1;35m$&\e[m/gr;
 
         for (["翻訳", $translation], ["読み", $readings], ["起こり", $source], ["Notes", $note]) {
             my ($field, $value) = @$_;
             next if !$value;
             $value =~ s/\n/\n        /g;
-            print "    $field: $value\n";
+            say "    $field: $value" =~ s/$color_regex/\e[1;35m$&\e[m/gr;
         }
 
-        print "\n";
+        say "";
     });
 }
 
