@@ -8,6 +8,6 @@ my $limit = 10 || shift;
 
 my $corpus = Anki::Corpus->new(file => $ENV{ANKI_CORPUS});
 $corpus->print_each("
-    ORDER BY created DESC
+    ORDER BY rowid DESC
     LIMIT $limit
 ");
