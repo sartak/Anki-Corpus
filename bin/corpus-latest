@@ -4,7 +4,7 @@ use warnings;
 use utf8::all;
 use Anki::Corpus;
 
-my $limit = 10 || shift;
+my $limit = shift || 10;
 
 my $corpus = Anki::Corpus->new;
 $corpus->print_each("
