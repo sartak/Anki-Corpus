@@ -7,14 +7,24 @@ use Anki::Corpus;
 die "usage: $0 query\n" unless @ARGV;
 my $query;
 my $regex = '(?!)';
+my @positive;
+my @negative;
+
 for my $clause (@ARGV) {
     if ($clause =~ s/^-//) {
-        $query .= " AND japanese NOT LIKE '%$clause%'"
+        push @negative, $clause;
     }
     else {
-        $query .= " AND japanese LIKE '%$clause%'";
+        push @positive, $clause;
         $regex .= "|\Q$clause\E";
     }
+}
+
+if (@positive) {
+    $query .= ' AND (' . join (' OR ', map { "japanese LIKE '%$_%'" } @positive ) . ')';
+}
+if (@negative) {
+    $query .= ' AND (' . join (' AND ', map { "japanese NOT LIKE '%$_%'" } @negative ) . ')';
 }
 
 my $corpus = Anki::Corpus->new;
