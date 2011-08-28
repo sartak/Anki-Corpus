@@ -8,7 +8,7 @@ use Params::Validate 'validate';
 has file => (
     is       => 'ro',
     isa      => 'Str',
-    required => 1,
+    default  => sub { $ENV{ANKI_CORPUS} },
 );
 
 has dbh => (
