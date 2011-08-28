@@ -9,23 +9,8 @@ my $query = join ' AND ',
             @ARGV;
 
 my $corpus = Anki::Corpus->new(file => $ENV{ANKI_CORPUS});
-my $sth = $corpus->prepare("
-    SELECT rowid, japanese, translation, readings, source, notes
-    FROM sentences
+$corpus->print_each("
     WHERE $query
     AND suspended=1
 ;");
-$sth->execute;
 
-while (my ($id, $sentence, $translation, $readings, $source, $note) = $sth->fetchrow_array) {
-    say "$id: $sentence";
-
-    for (["翻訳", $translation], ["読み", $readings], ["起こり", $source], ["Notes", $note]) {
-        my ($field, $value) = @$_;
-        next if !$value;
-        $value =~ s/\n/\n        /g;
-        say "    $field: $value";
-    }
-
-    print "\n";
-}
