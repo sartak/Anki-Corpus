@@ -30,8 +30,11 @@ while ($_) {
         die "Unknown character $1 in: $sentence"
             if $sentence =~ /([^\s\w、「」＜＞・。\-.！？『』（）()〝  〟／‥]<>)/;
 
+        $sentence =~ s/^「(.*)」$/$1/;
         $sentence =~ s/「//g unless $sentence =~ /」/;
         $sentence =~ s/」//g unless $sentence =~ /「/;
+
+        $sentence =~ s/^『(.*)』$/$1/;
         $sentence =~ s/『//g unless $sentence =~ /』/;
         $sentence =~ s/』//g unless $sentence =~ /『/;
 
