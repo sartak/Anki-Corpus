@@ -40,9 +40,17 @@ while ($_) {
 
         $sentence =~ s/(?<!。)。$//;
 
+        # text formatted from Aozora Bunko
+        my $reading;
+        if ($sentence =~ /《[\p{Hiragana}\p{Katakana}]+》/) {
+            $reading = $sentence;
+            $sentence =~ s/《[\p{Hiragana}\p{Katakana}]+》//g;
+        }
+
         $corpus->add_sentence(
             japanese => $sentence,
             source   => $source,
+            ($reading ? (reading => $reading) : ()),
         );
 
         say 2**$e++ if ++$i == 2**$e;
