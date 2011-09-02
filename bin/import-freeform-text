@@ -42,9 +42,10 @@ while ($_) {
 
         # text formatted from Aozora Bunko
         my $reading;
-        if ($sentence =~ /《[\p{Hiragana}\p{Katakana}]+》/) {
+        if ($sentence =~ /《.+?》/) {
             $reading = $sentence;
-            $sentence =~ s/《[\p{Hiragana}\p{Katakana}]+》//g;
+            $sentence =~ s/《.+?》//g;
+            $sentence =~ s/｜//g;
         }
 
         $corpus->add_sentence(
