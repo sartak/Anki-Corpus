@@ -38,6 +38,8 @@ while ($_) {
         $sentence =~ s/『//g unless $sentence =~ /』/;
         $sentence =~ s/』//g unless $sentence =~ /『/;
 
+        $sentence =~ s/(?<!。)。$//;
+
         $corpus->add_sentence(
             japanese => $sentence,
             source   => $source,
