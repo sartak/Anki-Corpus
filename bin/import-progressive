@@ -2,14 +2,33 @@
 use 5.14.0;
 use warnings;
 use utf8::all;
+use Encode qw/encode_utf8 decode_utf8/;
 use Anki::Corpus;
+use Proc::InvokeEditor;
 
 my $word = shift
     or die "usage: $0 word\n";
 
 my $corpus = Anki::Corpus->new;
+my @sentences;
+my @needs_editing;
+my @ok;
+
 while (<STDIN>) {
     next unless /\S/;
+
+    if (/［.*］/) {
+        push @needs_editing, $_;
+        next;
+    }
+    push @ok, $_;
+}
+
+if (@needs_editing) {
+    push @ok, split /\n/, decode_utf8(Proc::InvokeEditor->edit(encode_utf8(join "\n", map { join "", $_, $_ } @needs_editing)));
+}
+
+for (@ok) {
     my ($japanese, $translation) = split '｜', $_;
 
     unless ($japanese && $translation) {
@@ -22,10 +41,16 @@ while (<STDIN>) {
         s/\s+$//;
     }
 
-    my $id = $corpus->add_sentence(
+    push @sentences, {
         japanese    => $japanese,
         translation => $translation,
-        source      => 'プログレッシブ英和・和英中辞典',
+    };
+}
+
+while (my $sentence = shift @sentences) {
+    my $id = $corpus->add_sentence(
+        source => 'プログレッシブ英和・和英中辞典',
+        %$sentence,
     );
     if ($id) {
         $corpus->add_note(
