@@ -80,6 +80,7 @@ sub schematize {
 
     $dbh->do(<< '    SCHEMA');
         CREATE TABLE sentences (
+            rowid INTEGER PRIMARY KEY AUTOINCREMENT,
             japanese TEXT UNIQUE NOT NULL,
             translation TEXT,
             readings TEXT,
