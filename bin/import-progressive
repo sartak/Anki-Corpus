@@ -29,6 +29,8 @@ if (@needs_editing) {
 }
 
 for (@ok) {
+    next unless /\S/;
+
     my ($japanese, $translation) = split '｜', $_;
 
     unless ($japanese && $translation) {
