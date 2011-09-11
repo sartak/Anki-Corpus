@@ -63,7 +63,7 @@ sub add_sentence {
     };
 
     my $dbh = $self->dbh;
-    $dbh->do("INSERT INTO sentences (japanese, translation, readings, source, suspended, created, unsuspended) values (?, ?, ?, ?, ?, ?, ?);", {},
+    my $ok = $dbh->do("INSERT INTO sentences (japanese, translation, readings, source, suspended, created, unsuspended) values (?, ?, ?, ?, ?, ?, ?);", {},
         $args{japanese},
         $args{translation},
         $args{readings},
@@ -72,6 +72,8 @@ sub add_sentence {
         $args{created},
         $args{unsuspended},
     );
+    return unless $ok && defined wantarray;
+    return ($dbh->selectrow_array("select max(rowid) from sentences;")->fetchrow_array)[0];
 }
 
 sub schematize {
