@@ -10,6 +10,16 @@ my $regex = '(?!)';
 my @positive;
 my @negative;
 
+my $order = join ", ", map { "source='$_' DESC" } (
+    'MFSP',
+    'Smart.fm',
+    'プログレッシブ英和・和英中辞典',
+    'Twitter',
+    '四字熟語',
+    '四字熟語 Example',
+    # everything else
+);
+
 for my $clause (@ARGV) {
     if ($clause =~ s/^-//) {
         push @negative, $clause;
@@ -30,11 +40,13 @@ if (@negative) {
 my $corpus = Anki::Corpus->new;
 my $count = $corpus->print_each("
     WHERE suspended=1 $query
+    ORDER BY $order
 ;", sub { 1 }, $regex);
 
 if (!$count) {
     say "No suspended results, showing unsuspended rows:";
     $corpus->print_each("
         WHERE suspended=0 $query
+        ORDER BY $order
     ;", sub { 1 }, $regex);
 }
