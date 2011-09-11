@@ -28,7 +28,13 @@ if (@negative) {
 }
 
 my $corpus = Anki::Corpus->new;
-$corpus->print_each("
+my $count = $corpus->print_each("
     WHERE suspended=1 $query
 ;", sub { 1 }, $regex);
 
+if (!$count) {
+    say "No suspended results, showing unsuspended rows:";
+    $corpus->print_each("
+        WHERE suspended=0 $query
+    ;", sub { 1 }, $regex);
+}
