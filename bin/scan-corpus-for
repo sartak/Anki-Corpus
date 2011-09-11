@@ -19,6 +19,7 @@ my $order = join ", ", map { "source='$_' DESC" } (
     '四字熟語 Example',
     # everything else
 );
+$order .= ', rowid ASC';
 
 for my $clause (@ARGV) {
     if ($clause =~ s/^-//) {
