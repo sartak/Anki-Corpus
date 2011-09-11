@@ -22,10 +22,16 @@ while (<STDIN>) {
         s/\s+$//;
     }
 
-    $corpus->add_sentence(
+    my $id = $corpus->add_sentence(
         japanese    => $japanese,
         translation => $translation,
         source      => 'プログレッシブ英和・和英中辞典',
-        notes       => $word,
     );
+    if ($id) {
+        $corpus->add_note(
+            sentence => $id,
+            type     => '見出し語',
+            value    => $word,
+        );
+    }
 }

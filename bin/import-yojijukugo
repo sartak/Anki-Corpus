@@ -40,7 +40,7 @@ for my $id (keys %yoji) {
     my $suspended = $data{type} < 0 ? 1 : 0;
     die Dumper(\%data) unless $data{type} || $data{'四字熟語'} || $data{'読み'};
 
-    $corpus->add_sentence(
+    my $id = $corpus->add_sentence(
         japanese    => $data{'四字熟語'},
         translation => $data{Meaning},
         readings    => $data{'読み'},
@@ -48,14 +48,28 @@ for my $id (keys %yoji) {
         suspended   => $suspended,
         notes       => $data{Frequency},
     );
+    if ($id) {
+        $corpus->add_note(
+            sentence => $id,
+            type     => '使用頻度',
+            value    => $data{Frequency},
+        );
+    }
 
     if ($data{'J Example'}) {
-        $corpus->add_sentence(
+        $id = $corpus->add_sentence(
             japanese    => $data{'J Example'},
             translation => $data{'E Example'},
             source      => '四字熟語 Example',
             notes       => $data{'四字熟語'},
         );
+        if ($id) {
+            $corpus->add_note(
+                sentence => $id,
+                type     => '四字熟語',
+                value    => $data{'四字熟語'},
+            );
+        }
     }
 }
 
