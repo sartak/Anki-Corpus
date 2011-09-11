@@ -43,7 +43,6 @@ sub add_sentence {
         suspended   => { default => 1, regex => qr/\A[01]\z/ },
         created     => { default => time },
         unsuspended => { default => undef },
-        notes       => { default => undef },
     });
 
     if ($args{japanese} =~ s/。$//) {
@@ -64,7 +63,7 @@ sub add_sentence {
     };
 
     my $dbh = $self->dbh;
-    $dbh->do("INSERT INTO sentences (japanese, translation, readings, source, suspended, created, unsuspended, notes) values (?, ?, ?, ?, ?, ?, ?, ?);", {},
+    $dbh->do("INSERT INTO sentences (japanese, translation, readings, source, suspended, created, unsuspended) values (?, ?, ?, ?, ?, ?, ?);", {},
         $args{japanese},
         $args{translation},
         $args{readings},
@@ -72,7 +71,6 @@ sub add_sentence {
         $args{suspended},
         $args{created},
         $args{unsuspended},
-        $args{notes},
     );
 }
 
@@ -88,8 +86,12 @@ sub schematize {
             source TEXT NOT NULL,
             suspended BOOLEAN,
             created INTEGER NOT NULL,
-            unsuspended INTEGER,
-            notes TEXT
+            unsuspended INTEGER
+        );
+        CREATE TABLE notes (
+            sentence INTEGER NOT NULL,
+            type TEXT NOT NULL,
+            value TEXT NOT NULL
         );
     SCHEMA
 }
@@ -100,7 +102,7 @@ sub each_sentence {
     my $sub   = shift;
 
     my $sth = $self->prepare("
-        SELECT rowid, japanese, translation, readings, source, notes
+        SELECT rowid, japanese, translation, readings, source
         FROM sentences
         $query
     ;");
@@ -125,12 +127,14 @@ sub print_each {
     $self->each_sentence($query, sub {
         return if $filter && !$filter->(@_);
 
-        my ($id, $sentence, $translation, $readings, $source, $note) = @_;
+        my ($id, $sentence, $translation, $readings, $source) = @_;
 
         say "$id: $sentence" =~ s/$color_regex/\e[1;35m$&\e[m/gr;
         ++$count;
 
-        for (["翻訳", $translation], ["読み", $readings], ["起こり", $source], ["Notes", $note]) {
+        my %notes = $self->notes_for($id);
+
+        for (["翻訳", $translation], ["読み", $readings], ["起こり", $source], map { [$_, $notes{$_} ] } sort keys %notes) {
             my ($field, $value) = @$_;
             next if !$value;
             $value =~ s/\n/\n        /g;
@@ -147,6 +151,41 @@ sub print_each {
     }
 
     return $count;
+}
+
+sub add_note {
+    my $self = shift;
+    my %args = validate(@_, {
+        sentence => 1,
+        type     => 1,
+        value    => 1,
+    });
+
+    my $dbh = $self->dbh;
+    $dbh->do("INSERT INTO notes (sentence, type, value) values (?, ?, ?);", {},
+        $args{sentence},
+        $args{type},
+        $args{value},
+    );
+}
+
+sub notes_for {
+    my $self = shift;
+    my $id = shift;
+
+    my $sth = $self->prepare("
+        select type, value
+        from notes
+        where sentence = ?
+    ;");
+
+    $sth->execute($id);
+    my %notes;
+    while (my ($type, $value) = $sth->fetchrow_array) {
+        $notes{$type} = $value;
+    }
+
+    return %notes;
 }
 
 1;
