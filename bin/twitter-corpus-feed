@@ -15,8 +15,10 @@ my $twitter = Net::Twitter->new(
 my $statuses = $twitter->friends_timeline({ count => 200, include_rts => 0 });
 
 for my $status (reverse @$statuses) {
-    my $user = $status->user->screen_name;
-    my $text = $status->text;
+    my $tweet_id = $status->id;
+    my $user     = $status->user->screen_name;
+    my $text     = $status->text;
+    my $url      = "http://twitter.com/$user/status/$tweet_id";
 
     # my japanese is not worth imitating
     next if lc($user) eq 'sartak';
@@ -33,6 +35,11 @@ for my $status (reverse @$statuses) {
             sentence => $id,
             type     => '作者',
             value    => $user,
+        );
+        $corpus->add_note(
+            sentence => $id,
+            type     => 'URL',
+            value    => $url,
         );
     }
 }
