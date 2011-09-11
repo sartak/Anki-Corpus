@@ -73,7 +73,7 @@ sub add_sentence {
         $args{unsuspended},
     );
     return unless $ok && defined wantarray;
-    return ($dbh->selectrow_array("select max(rowid) from sentences;")->fetchrow_array)[0];
+    return ($dbh->selectrow_array("select max(rowid) from sentences;"))[0];
 }
 
 sub schematize {
