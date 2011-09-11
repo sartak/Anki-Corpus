@@ -1,0 +1,30 @@
+#!/usr/bin/env perl
+use 5.14.0;
+use warnings;
+use utf8::all;
+use Anki::Corpus;
+
+my %type_of = (
+    'プログレッシブ英和・和英中辞典' => '見出し語',
+    'MFSP'                           => '説明',
+    'Twitter'                        => '作者',
+    '四字熟語'                       => '使用頻度',
+    '四字熟語 Example'               => '四字熟語',
+);
+
+my $corpus = Anki::Corpus->new;
+$corpus->each_sentence("WHERE notes <> ''", sub {
+    my ($id, $sentence, $translation, $readings, $source, $note) = @_;
+    my $note_type = $type_of{$source}
+        or die "Can't handle notes with source $source:\n  $sentence\n    notes: $note";
+
+    $corpus->dbh->begin_work;
+    $corpus->add_note(
+        sentence => $id,
+        type     => $note_type,
+        value    => $note,
+    );
+    $corpus->dbh->do("update sentences set notes=NULL where rowid=$id;");
+    $corpus->dbh->commit;
+});
+
