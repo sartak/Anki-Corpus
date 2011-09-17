@@ -236,9 +236,9 @@ sub scan_for {
         'MFSP',
         'Smart.fm',
         'プログレッシブ英和・和英中辞典',
-        'Twitter',
         '四字熟語',
         '四字熟語 Example',
+        'Twitter',
         # everything else
     );
     $order .= ', rowid ASC';
