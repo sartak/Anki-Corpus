@@ -5,6 +5,7 @@ use utf8;
 use Any::Moose;
 use DBI;
 use Params::Validate 'validate';
+use Anki::Corpus::Sentence;
 
 # ABSTRACT: interact with a corpus of sentences for Anki
 
@@ -113,24 +114,41 @@ sub each_sentence {
 
     my $count = 0;
     while (my @results = $sth->fetchrow_array) {
+        my $sentence = Anki::Corpus::Sentence->new(
+            corpus      =>  $self,
+            rowid       =>  $results[0],
+            japanese    =>  $results[1],
+            translation =>  $results[2],
+            readings    =>  $results[3],
+            source      =>  $results[4],
+            suspended   => !$results[5],
+        );
         ++$count;
-        $sub->(@results);
+        $sub->($sentence);
     }
     return $count;
 }
 
 sub print_sentence {
-    my $self = shift;
-    my ($id, $sentence, $translation, $readings, $source, $unsuspended) = @{ shift(@_) };
+    my $self        = shift;
+    my $sentence    = shift;
     my $color_regex = shift;
 
-    say "$id: $sentence" =~ s/$color_regex/\e[1;35m$&\e[m/gr;
+    say(($sentence->id . ": " . $sentence->japanese) =~ s/$color_regex/\e[1;35m$&\e[m/gr);
 
-    my %notes = $self->notes_for($id);
+    my @fields;
 
-    for (["翻訳", $translation], ["読み", $readings], ["起こり", $source], map { [$_, $notes{$_} ] } sort keys %notes) {
+    for (["翻訳", 'translation'], ["読み", 'readings'], ["起こり", 'source']) {
+        my ($field, $method) = @$_;
+        my $value = $sentence->$method;
+        push @fields, [$field, $value] if $value;
+    }
+
+    my %notes = %{ $sentence->notes };
+    push @fields, map { [$_, $notes{$_} ] } sort keys %notes;
+
+    for (@fields) {
         my ($field, $value) = @$_;
-        next if !$value;
         $value =~ s/\n/\n        /g;
         say "    $field: $value" =~ s/$color_regex/\e[1;35m$&\e[m/gr;
     }
@@ -145,9 +163,10 @@ sub print_each {
     my $count;
 
     $self->each_sentence($query, sub {
-        return if $filter && !$filter->(@_);
+        my $sentence = shift;
+        return if $filter && !$filter->($sentence);
         ++$count;
-        $self->print_sentence([@_], $color_regex);
+        $self->print_sentence($sentence, $color_regex);
         say "";
     });
 
@@ -236,7 +255,8 @@ sub scan_for {
     $query .= " ORDER BY $order";
 
     my $count = $self->each_sentence($query, sub {
-        $cb->([@_], $regex);
+        my $sentence = shift;
+        $cb->($sentence, $regex);
     });
 
     if ($count) {
