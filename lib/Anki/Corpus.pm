@@ -284,5 +284,7 @@ sub unsuspend_sentence {
     $dbh->do("UPDATE sentences SET suspended=0 WHERE rowid=?", {}, $id);
 }
 
+no Any::Moose;
+__PACKAGE__->meta->make_immutable;
 1;
 
