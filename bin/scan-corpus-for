@@ -22,13 +22,34 @@ sub copy {
 }
 
 my %commands = (
-    "s" => sub { shift->suspend },
-    "u" => sub { shift->unsuspend},
-    "q" => sub { ReadMode 0; exit },
-    "N" => sub { copy(shift->japanese) },
-    "S" => sub { copy(shift->source) },
-    "H" => sub { copy(shift->translation) },
-    "Y" => sub { copy(shift->readings) },
+    "s" => {
+        description => 'suspend sentence',
+        code        => sub { shift->suspend }
+    },
+    "u" => {
+        description => 'unsuspend sentence',
+        code        => sub { shift->unsuspend},
+    },
+    "q" => {
+        description => 'cut out all this nonsense',
+        code        => sub { ReadMode 0; exit },
+    },
+    "N" => {
+        description => 'copy sentence (日本語)',
+        code        => sub { copy(shift->japanese) },
+    },
+    "S" => {
+        description => 'copy source (出所)',
+        code        => sub { copy(shift->source) },
+    },
+    "H" => {
+        description => 'copy translation (翻訳)',
+        code        => sub { copy(shift->translation) },
+    },
+    "Y" => {
+        description => 'copy readings (読み)',
+        code        => sub { copy(shift->readings) },
+    },
 );
 my $commands = join '', sort keys %commands;
 
@@ -43,19 +64,34 @@ my $cb = sub {
         print "\n";
         $corpus->print_sentence($sentence, $regex);
 
-        local $commands{j} = sub {
-            last;
+        local $commands{j} = {
+            description => 'down one',
+            code        => sub {
+                last;
+            },
         } if ${ $args{next} } < $count;
 
         my $back_one = $index - 1;
-        local $commands{k} = sub {
-            ${ $args{next} } = $back_one;
-            last;
+        local $commands{k} = {
+            description => 'up one',
+            code        => sub {
+                ${ $args{next} } = $back_one;
+                last;
+            },
         } if $back_one >= 0;
 
         delete local $commands{H} unless $sentence->has_translation;
         delete local $commands{Y} unless $sentence->has_readings;
         delete local $commands{$sentence->suspended ? 's' : 'u'};
+
+        $commands{'?'} = {
+            description => 'get help',
+            code        => sub {
+                for my $key (sort keys %commands) {
+                    say "$key: $commands{$key}{description}";
+                }
+            },
+        };
 
         my $commands = join '', sort keys %commands;
         local $| = 1;
@@ -71,7 +107,7 @@ my $cb = sub {
             next;
         }
 
-        $commands{$command}->($sentence);
+        $commands{$command}{code}->($sentence);
         $sentence->refresh;
     }
 };
