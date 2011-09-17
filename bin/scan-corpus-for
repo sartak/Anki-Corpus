@@ -24,6 +24,7 @@ my $cb = sub {
         when ("\n") { }
         when ("s") { $corpus->suspend_sentence($id) };
         when ("u") { $corpus->unsuspend_sentence($id) };
+        when ("q") { exit };
     }
 };
 
