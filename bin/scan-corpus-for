@@ -27,6 +27,7 @@ my %commands = (
     "N" => sub { copy(shift->japanese) },
     "S" => sub { copy(shift->source) },
     "H" => sub { copy(shift->translation) },
+    "Y" => sub { copy(shift->readings) },
 );
 my $commands = join '', sort keys %commands;
 
@@ -41,6 +42,7 @@ my $cb = sub {
 
     while (1) {
         delete local $commands{H} unless $sentence->has_translation;
+        delete local $commands{Y} unless $sentence->has_readings;
         delete local $commands{$sentence->suspended ? 's' : 'u'};
 
         my $commands = join '', sort keys %commands;
