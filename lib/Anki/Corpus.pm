@@ -172,23 +172,23 @@ sub print_each {
     my $filter      = shift;
     my $color_regex = shift || qr/(?!)/;
 
-    my $count;
+    my $real_count;
 
     $self->each_sentence($query, sub {
         my ($sentence, $index, $count, $next) = @_;
         return if $filter && !$filter->($sentence);
-        ++$count;
+        ++$real_count;
         $self->print_sentence($sentence, $color_regex);
         say "";
     });
 
-    if ($count) {
-        print "$count row";
-        print "s" if $count != 1;
+    if ($real_count) {
+        print "$real_count row";
+        print "s" if $real_count != 1;
         print "\n";
     }
 
-    return $count;
+    return $real_count;
 }
 
 sub add_note {
