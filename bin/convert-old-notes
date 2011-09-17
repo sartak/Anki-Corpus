@@ -4,6 +4,8 @@ use warnings;
 use utf8::all;
 use Anki::Corpus;
 
+die "This script is only for historical note!";
+
 my %type_of = (
     'プログレッシブ英和・和英中辞典' => '見出し語',
     'MFSP'                           => '説明',
