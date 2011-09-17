@@ -4,6 +4,7 @@ use warnings;
 use utf8::all;
 use Anki::Corpus;
 use Term::ReadKey;
+use Clipboard;
 
 die "usage: $0 query\n" unless @ARGV;
 
@@ -16,11 +17,21 @@ my %commands = (
     "s" => sub { $corpus->suspend_sentence(shift) },
     "u" => sub { $corpus->unsuspend_sentence(shift) },
     "q" => sub { exit },
+    "N" => sub {
+        my ($id, $sentence, $translation, $readings, $source) = @_;
+        Clipboard->copy($sentence);
+        say "Copied: $sentence";
+    },
+    "S" => sub {
+        my ($id, $sentence, $translation, $readings, $source) = @_;
+        Clipboard->copy($source);
+        say "Copied: $source";
+    },
 );
 my $commands = join '', sort keys %commands;
 
 my $cb = sub {
-    my ($id, $sentence, $translation, $readings, $source) = @{ $_[0] };
+    my $fields = $_[0];
 
     print "\e[2J";
 
@@ -36,7 +47,7 @@ my $cb = sub {
         print "\n" if $command ne "\n";
         last if $command eq "\n" || $command eq " ";
 
-        $commands{$command}->($id);
+        $commands{$command}->(@$fields);
     }
 };
 
