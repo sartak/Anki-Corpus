@@ -51,6 +51,7 @@ has notes => (
     isa     => 'HashRef[Str]',
     lazy    => 1,
     builder => '_build_notes',
+    clearer => '_clear_notes',
 );
 
 sub id { shift->rowid }
@@ -78,6 +79,36 @@ sub unsuspend {
     my $self = shift;
     $self->{suspended} = 1;
     $self->corpus->unsuspend_sentence($self->id);
+}
+
+sub refresh {
+    my $self = shift;
+
+    $self->_clear_notes;
+
+    my $sth = $self->corpus->prepare("
+        SELECT japanese, translation, readings, source, unsuspended
+        FROM sentences
+        WHERE rowid=?
+    ;");
+    $sth->execute($self->rowid);
+
+    my @results = $sth->fetchrow_array
+        or return;
+
+    $self->{japanese}    =  $results[0];
+    $self->{source}      =  $results[3];
+    $self->{suspended}   = !$results[4];
+
+    delete $self->{translation};
+    $self->{translation} = $results[1]
+        if defined $results[1] && $results[1] ne '';
+
+    delete $self->{readings};
+    $self->{readings} = $results[2]
+        if defined $results[2] && $results[2] ne '';
+
+    return $self;
 }
 
 no Any::Moose;
