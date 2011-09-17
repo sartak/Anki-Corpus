@@ -77,7 +77,7 @@ sub suspend {
 
 sub unsuspend {
     my $self = shift;
-    $self->{suspended} = 1;
+    $self->{suspended} = 0;
     $self->corpus->unsuspend_sentence($self->id);
 }
 
