@@ -129,7 +129,7 @@ sub each_sentence {
     }
 
     my $i = 0;
-    while ($i < @sentences) {
+    while ($i >= 0 && $i < @sentences) {
         my $sentence = $sentences[$i];
         my $next = $i + 1;
 
