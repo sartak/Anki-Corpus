@@ -93,7 +93,7 @@ sub refresh {
     ;");
     $sth->execute($self->rowid);
 
-    my @results = $sth->fetchrow_array
+    my @results = @{ $sth->fetchall_arrayref->[0] || [] }
         or return;
 
     $self->{japanese}    =  $results[0];
