@@ -1,0 +1,36 @@
+#!/usr/bin/env perl
+use 5.14.0;
+use warnings;
+use utf8::all;
+use Anki::Corpus;
+use Term::ReadKey;
+
+die "usage: $0 query\n" unless @ARGV;
+
+ReadMode 3;
+END { ReadMode 0 }
+
+my $corpus = Anki::Corpus->new;
+my $cb = sub {
+    my ($id, $sentence, $translation, $readings, $source) = @{ $_[0] };
+    $corpus->print_sentence(@_);
+    local $| = 1;
+    print "Command: ";
+    my $command = ReadKey 0;
+    exit if !defined($command);
+    print "$command\n";
+
+    given ($command) {
+        when ("\n") { }
+        when ("s") { $corpus->suspend_sentence($id) };
+        when ("u") { $corpus->unsuspend_sentence($id) };
+    }
+};
+
+my $count = $corpus->scan_for([@ARGV], $cb, 'WHERE suspended=1');
+
+if (!$count) {
+    say "No suspended results, showing unsuspended rows";
+    $corpus->scan_for([@ARGV], $cb, 'WHERE suspended=0');
+}
+
