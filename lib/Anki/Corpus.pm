@@ -113,6 +113,8 @@ sub each_sentence {
     $sth->execute;
 
     my $count = 0;
+    my @sentences;
+
     while (my @results = $sth->fetchrow_array) {
         my $sentence = Anki::Corpus::Sentence->new(
             corpus      =>  $self,
@@ -123,10 +125,14 @@ sub each_sentence {
             source      =>  $results[4],
             suspended   => !$results[5],
         );
-        ++$count;
-        $sub->($sentence);
+        push @sentences, $sentence;
     }
-    return $count;
+
+    for (@sentences) {
+        $sub->($_);
+    }
+
+    return scalar @sentences;
 }
 
 sub print_sentence {
