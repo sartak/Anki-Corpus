@@ -32,7 +32,7 @@ my %commands = (
     },
     "d" => {
         description => 'delete sentence',
-        code        => sub { shift->delete },
+        code        => sub { shift->delete; last },
     },
     "q" => {
         description => 'cut out all this nonsense',
