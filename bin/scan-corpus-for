@@ -32,13 +32,23 @@ my %commands = (
 my $commands = join '', sort keys %commands;
 
 my $cb = sub {
-    my $sentence = shift;
-    my $regex    = shift;
+    my %args     = @_;
+    my $sentence = $args{sentence};
+    my $regex    = $args{regex};
 
     print "\e[2J";
 
     while (1) {
         $corpus->print_sentence($sentence, $regex);
+
+        local $commands{j} = sub {
+            last;
+        } if ${ $args{next} } < $args{count};
+
+        local $commands{k} = sub {
+            ${ $args{next} } -= 2;
+            last;
+        } if ${ $args{next} } - 2 >= 0;
 
         delete local $commands{H} unless $sentence->has_translation;
         delete local $commands{Y} unless $sentence->has_readings;
@@ -46,7 +56,7 @@ my $cb = sub {
 
         my $commands = join '', sort keys %commands;
         local $| = 1;
-        print "Command [$commands]: ";
+        print "{$args{index}/$args{count}} Command [$commands]: ";
 
         my $command = ReadKey 0;
         do { ReadMode 0; exit } if !defined($command);

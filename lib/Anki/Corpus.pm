@@ -128,8 +128,14 @@ sub each_sentence {
         push @sentences, $sentence;
     }
 
-    for (@sentences) {
-        $sub->($_);
+    my $i = 0;
+    while ($i < @sentences) {
+        my $sentence = $sentences[$i];
+        my $next = $i + 1;
+
+        $sub->($sentence, $i, scalar(@sentences), \$next);
+
+        $i = $next;
     }
 
     return scalar @sentences;
@@ -169,7 +175,7 @@ sub print_each {
     my $count;
 
     $self->each_sentence($query, sub {
-        my $sentence = shift;
+        my ($sentence, $index, $count, $next) = @_;
         return if $filter && !$filter->($sentence);
         ++$count;
         $self->print_sentence($sentence, $color_regex);
@@ -237,7 +243,7 @@ sub scan_for {
     );
     $order .= ', rowid ASC';
 
-    my $regex = '(?!)';
+    my $color_regex = '(?!)';
     my @positive;
     my @negative;
 
@@ -247,7 +253,7 @@ sub scan_for {
         }
         else {
             push @positive, $clause;
-            $regex .= "|\Q$clause\E";
+            $color_regex .= "|\Q$clause\E";
         }
     }
 
@@ -261,8 +267,14 @@ sub scan_for {
     $query .= " ORDER BY $order";
 
     my $count = $self->each_sentence($query, sub {
-        my $sentence = shift;
-        $cb->($sentence, $regex);
+        my ($sentence, $index, $count, $next) = @_;
+        $cb->({
+            sentence => $sentence,
+            index    => $index,
+            count    => $count,
+            next     => $next,
+            regex    => $color_regex,
+        });
     });
 
     if ($count) {
