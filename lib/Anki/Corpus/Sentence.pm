@@ -53,6 +53,8 @@ has notes => (
     builder => '_build_notes',
 );
 
+sub id { shift->rowid }
+
 override BUILDARGS => sub {
     my $args = super;
     for ('translation', 'readings') {
