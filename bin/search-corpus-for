@@ -8,7 +8,7 @@ die "usage: $0 query\n" unless @ARGV;
 my $corpus = Anki::Corpus->new;
 my $cb = sub {
     my %args = @_;
-    $corpus->print_sentence($args{sentence});
+    $corpus->print_sentence($args{sentence}, $args{regex});
     say "";
 };
 

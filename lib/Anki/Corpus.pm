@@ -268,13 +268,13 @@ sub scan_for {
 
     my $count = $self->each_sentence($query, sub {
         my ($sentence, $index, $count, $next) = @_;
-        $cb->({
+        $cb->(
             sentence => $sentence,
             index    => $index,
             count    => $count,
             next     => $next,
             regex    => $color_regex,
-        });
+        );
     });
 
     if ($count) {
