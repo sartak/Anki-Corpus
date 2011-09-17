@@ -5,49 +5,12 @@ use utf8::all;
 use Anki::Corpus;
 
 die "usage: $0 query\n" unless @ARGV;
-my $query;
-my $regex = '(?!)';
-my @positive;
-my @negative;
-
-my $order = join ", ", map { "source='$_' DESC" } (
-    'MFSP',
-    'Smart.fm',
-    'プログレッシブ英和・和英中辞典',
-    'Twitter',
-    '四字熟語',
-    '四字熟語 Example',
-    # everything else
-);
-$order .= ', rowid ASC';
-
-for my $clause (@ARGV) {
-    if ($clause =~ s/^-//) {
-        push @negative, $clause;
-    }
-    else {
-        push @positive, $clause;
-        $regex .= "|\Q$clause\E";
-    }
-}
-
-if (@positive) {
-    $query .= ' AND (' . join (' OR ', map { "japanese LIKE '%$_%'" } @positive ) . ')';
-}
-if (@negative) {
-    $query .= ' AND (' . join (' AND ', map { "japanese NOT LIKE '%$_%'" } @negative ) . ')';
-}
-
 my $corpus = Anki::Corpus->new;
-my $count = $corpus->print_each("
-    WHERE suspended=1 $query
-    ORDER BY $order
-;", sub { 1 }, $regex);
+my $cb = sub { $corpus->print_sentence(@_); say "" };
+
+my $count = $corpus->scan_for([@ARGV], $cb, 'WHERE suspended=1');
 
 if (!$count) {
-    say "No suspended results, showing unsuspended rows:";
-    $corpus->print_each("
-        WHERE suspended=0 $query
-        ORDER BY $order
-    ;", sub { 1 }, $regex);
+    say "No suspended results, showing unsuspended rows";
+    $corpus->scan_for([@ARGV], $cb, 'WHERE suspended=0');
 }

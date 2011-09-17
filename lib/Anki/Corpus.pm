@@ -119,6 +119,23 @@ sub each_sentence {
     return $count;
 }
 
+sub print_sentence {
+    my $self = shift;
+    my ($id, $sentence, $translation, $readings, $source) = @{ shift(@_) };
+    my $color_regex = shift;
+
+    say "$id: $sentence" =~ s/$color_regex/\e[1;35m$&\e[m/gr;
+
+    my %notes = $self->notes_for($id);
+
+    for (["翻訳", $translation], ["読み", $readings], ["起こり", $source], map { [$_, $notes{$_} ] } sort keys %notes) {
+        my ($field, $value) = @$_;
+        next if !$value;
+        $value =~ s/\n/\n        /g;
+        say "    $field: $value" =~ s/$color_regex/\e[1;35m$&\e[m/gr;
+    }
+}
+
 sub print_each {
     my $self        = shift;
     my $query       = shift;
@@ -129,21 +146,8 @@ sub print_each {
 
     $self->each_sentence($query, sub {
         return if $filter && !$filter->(@_);
-
-        my ($id, $sentence, $translation, $readings, $source) = @_;
-
-        say "$id: $sentence" =~ s/$color_regex/\e[1;35m$&\e[m/gr;
         ++$count;
-
-        my %notes = $self->notes_for($id);
-
-        for (["翻訳", $translation], ["読み", $readings], ["起こり", $source], map { [$_, $notes{$_} ] } sort keys %notes) {
-            my ($field, $value) = @$_;
-            next if !$value;
-            $value =~ s/\n/\n        /g;
-            say "    $field: $value" =~ s/$color_regex/\e[1;35m$&\e[m/gr;
-        }
-
+        $self->print_sentence([@_], $color_regex);
         say "";
     });
 
@@ -189,6 +193,59 @@ sub notes_for {
     }
 
     return %notes;
+}
+
+sub scan_for {
+    my $self  = shift;
+    my @args  = @{ shift() };
+    my $cb    = shift;
+    my $query = shift || 'WHERE ';
+
+    my $order = join ", ", map { "source='$_' DESC" } (
+        'MFSP',
+        'Smart.fm',
+        'プログレッシブ英和・和英中辞典',
+        'Twitter',
+        '四字熟語',
+        '四字熟語 Example',
+        # everything else
+    );
+    $order .= ', rowid ASC';
+
+    my $regex = '(?!)';
+    my @positive;
+    my @negative;
+
+    for my $clause (@ARGV) {
+        if ($clause =~ s/^-//) {
+            push @negative, $clause;
+        }
+        else {
+            push @positive, $clause;
+            $regex .= "|\Q$clause\E";
+        }
+    }
+
+    if (@positive) {
+        $query .= ' AND (' . join (' OR ', map { "japanese LIKE '%$_%'" } @positive ) . ')';
+    }
+    if (@negative) {
+        $query .= ' AND (' . join (' AND ', map { "japanese NOT LIKE '%$_%'" } @negative ) . ')';
+    }
+
+    $query .= " ORDER BY $order";
+
+    my $count = $self->each_sentence($query, sub {
+        $cb->([@_], $regex);
+    });
+
+    if ($count) {
+        print "$count row";
+        print "s" if $count != 1;
+        say "";
+    }
+
+    return $count;
 }
 
 1;
