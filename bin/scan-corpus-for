@@ -11,20 +11,32 @@ ReadMode 3;
 END { ReadMode 0 }
 
 my $corpus = Anki::Corpus->new;
+
+my %commands = (
+    "s" => sub { $corpus->suspend_sentence(shift) },
+    "u" => sub { $corpus->unsuspend_sentence(shift) },
+    "q" => sub { exit },
+);
+my $commands = join '', sort keys %commands;
+
 my $cb = sub {
     my ($id, $sentence, $translation, $readings, $source) = @{ $_[0] };
-    $corpus->print_sentence(@_);
-    local $| = 1;
-    print "Command: ";
-    my $command = ReadKey 0;
-    exit if !defined($command);
-    print "$command\n";
 
-    given ($command) {
-        when ("\n") { }
-        when ("s") { $corpus->suspend_sentence($id) };
-        when ("u") { $corpus->unsuspend_sentence($id) };
-        when ("q") { exit };
+    print "\e[2J";
+
+    while (1) {
+        $corpus->print_sentence(@_);
+
+        local $| = 1;
+        print "Command [$commands]: ";
+
+        my $command = ReadKey 0;
+        exit if !defined($command);
+        print "$command\n";
+        print "\n" if $command ne "\n";
+        last if $command eq "\n" || $command eq " ";
+
+        $commands{$command}->($id);
     }
 };
 
