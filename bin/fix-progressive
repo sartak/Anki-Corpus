@@ -1,0 +1,64 @@
+#!/usr/bin/env perl
+use 5.14.0;
+use warnings;
+use utf8::all;
+use Anki::Corpus;
+use Encode qw/encode_utf8 decode_utf8/;
+use Proc::InvokeEditor;
+
+my $corpus = Anki::Corpus->new;
+$corpus->each_sentence('WHERE japanese LIKE "%〔%〕";', sub {
+    my $sentence = shift;
+    say $sentence->japanese;
+
+    (my $new_japanese = $sentence->japanese) =~ s/〔(.*)〕$//;
+    my $setsumei = $1;
+    $corpus->dbh->begin_work;
+
+    $corpus->add_note(
+        sentence => $sentence->id,
+        type     => '説明',
+        value    => $setsumei,
+    );
+
+    $corpus->dbh->do("UPDATE sentences SET japanese=? WHERE rowid=?", {},
+        $new_japanese,
+        $sentence->id,
+    );
+
+    $corpus->dbh->commit;
+});
+
+$corpus->each_sentence('WHERE source="プログレッシブ英和・和英中辞典" and japanese LIKE "%［%］%";', sub {
+    my $sentence = shift;
+    my $input = join '｜', $sentence->japanese, $sentence->translation;
+    my @new_sentences = split /\n/, decode_utf8(Proc::InvokeEditor->edit(encode_utf8($input)));
+
+    $corpus->dbh->begin_work;
+
+    my %notes = %{ $sentence->notes };
+
+    for (@new_sentences) {
+        my ($japanese, $translation) = split /｜/, $_;
+        my $id = $corpus->add_sentence(
+            source      =>  'プログレッシブ英和・和英中辞典',
+            japanese    => $japanese,
+            translation => $translation,
+        );
+
+        if (!$id) { die "insert failed" }
+
+        for my $type (keys %notes) {
+            $corpus->add_note(
+                sentence => $id,
+                type     => $type,
+                value    => $notes{$type},
+            );
+        }
+    }
+
+    $corpus->dbh->do("delete from notes where sentence=?", {}, $sentence->rowid);
+    $corpus->dbh->do("delete from sentences where rowid=?", {}, $sentence->rowid);
+
+    $corpus->dbh->commit;
+});
