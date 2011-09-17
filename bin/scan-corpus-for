@@ -23,7 +23,7 @@ sub copy {
 my %commands = (
     "s" => sub { shift->suspend },
     "u" => sub { shift->unsuspend},
-    "q" => sub { exit },
+    "q" => sub { ReadMode 0; exit },
     "N" => sub { copy(shift->japanese) },
     "S" => sub { copy(shift->source) },
     "H" => sub { copy(shift->translation) },
@@ -47,7 +47,7 @@ my $cb = sub {
         print "Command [$commands]: ";
 
         my $command = ReadKey 0;
-        exit if !defined($command);
+        do { ReadMode 0; exit } if !defined($command);
         print "$command\n";
         last if $command eq "\n" || $command eq " ";
 
