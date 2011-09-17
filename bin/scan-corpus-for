@@ -28,7 +28,11 @@ my %commands = (
     },
     "u" => {
         description => 'unsuspend sentence',
-        code        => sub { shift->unsuspend},
+        code        => sub { shift->unsuspend },
+    },
+    "d" => {
+        description => 'delete sentence',
+        code        => sub { shift->delete },
     },
     "q" => {
         description => 'cut out all this nonsense',

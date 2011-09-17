@@ -81,6 +81,17 @@ sub unsuspend {
     $self->corpus->unsuspend_sentence($self->id);
 }
 
+sub delete {
+    my $self = shift;
+    my $dbh = $self->corpus->dbh;
+    $dbh->begin_work;
+
+    $dbh->do("DELETE FROM sentences WHERE rowid=?;", {}, $self->rowid);
+    $dbh->do("DELETE FROM notes WHERE sentence=?;", {}, $self->rowid);
+
+    $dbh->commit;
+}
+
 sub refresh {
     my $self = shift;
 
