@@ -25,18 +25,18 @@ my %commands = (
     "u" => sub { $corpus->unsuspend_sentence(shift) },
     "q" => sub { exit },
     "N" => sub {
-        my ($id, $sentence, $translation, $readings, $source) = @_;
+        my ($id, $sentence, $translation, $readings, $source, $unsuspended) = @_;
         copy($sentence);
     },
     "S" => sub {
-        my ($id, $sentence, $translation, $readings, $source) = @_;
+        my ($id, $sentence, $translation, $readings, $source, $unsuspended) = @_;
         copy($source);
     },
 );
 my $commands = join '', sort keys %commands;
 
 my $cb = sub {
-    my $fields = $_[0];
+    my ($id, $sentence, $translation, $readings, $source, $unsuspended) = my (@fields) = @{ $_[0] };
 
     print "\e[2J";
 

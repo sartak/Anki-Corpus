@@ -105,7 +105,7 @@ sub each_sentence {
     my $sub   = shift;
 
     my $sth = $self->prepare("
-        SELECT rowid, japanese, translation, readings, source
+        SELECT rowid, japanese, translation, readings, source, unsuspended
         FROM sentences
         $query
     ;");
@@ -121,7 +121,7 @@ sub each_sentence {
 
 sub print_sentence {
     my $self = shift;
-    my ($id, $sentence, $translation, $readings, $source) = @{ shift(@_) };
+    my ($id, $sentence, $translation, $readings, $source, $unsuspended) = @{ shift(@_) };
     my $color_regex = shift;
 
     say "$id: $sentence" =~ s/$color_regex/\e[1;35m$&\e[m/gr;
