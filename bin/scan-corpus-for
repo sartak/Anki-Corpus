@@ -21,30 +21,29 @@ sub copy {
 }
 
 my %commands = (
-    "s" => sub { $corpus->suspend_sentence(shift) },
-    "u" => sub { $corpus->unsuspend_sentence(shift) },
+    "s" => sub { shift->suspend },
+    "u" => sub { shift->unsuspend},
     "q" => sub { exit },
-    "N" => sub {
-        my ($id, $sentence, $translation, $readings, $source, $unsuspended) = @_;
-        copy($sentence);
-    },
-    "S" => sub {
-        my ($id, $sentence, $translation, $readings, $source, $unsuspended) = @_;
-        copy($source);
-    },
+    "N" => sub { copy(shift->japanese) },
+    "S" => sub { copy(shift->source) },
+    "H" => sub { copy(shift->translation) },
 );
 my $commands = join '', sort keys %commands;
 
 my $cb = sub {
-    my ($id, $sentence, $translation, $readings, $source, $unsuspended) = my (@fields) = @{ $_[0] };
+    my $sentence = shift;
+    my $regex    = shift;
 
     print "\e[2J";
+    $corpus->print_sentence($sentence, $regex);
+
+    local $| = 1;
 
     while (1) {
-        print "\n";
-        $corpus->print_sentence(@_);
+        delete local $commands{H} unless $sentence->has_translation;
+        delete local $commands{$sentence->suspended ? 's' : 'u'};
 
-        local $| = 1;
+        my $commands = join '', sort keys %commands;
         print "Command [$commands]: ";
 
         my $command = ReadKey 0;
@@ -52,7 +51,12 @@ my $cb = sub {
         print "$command\n";
         last if $command eq "\n" || $command eq " ";
 
-        $commands{$command}->(@$fields);
+        if (!exists($commands{$command})) {
+            say "Invalid command $command";
+            next;
+        }
+
+        $commands{$command}->($sentence);
     }
 };
 
