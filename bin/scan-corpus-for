@@ -1,6 +1,7 @@
 #!/usr/bin/env perl
 use 5.14.0;
 use warnings;
+no warnings 'exiting';
 use utf8::all;
 use Anki::Corpus;
 use Term::ReadKey;
