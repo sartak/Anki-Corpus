@@ -40,6 +40,7 @@ my $cb = sub {
     my $count    = $args{count};
 
     while (1) {
+        print "\n";
         $corpus->print_sentence($sentence, $regex);
 
         local $commands{j} = sub {
