@@ -4,7 +4,6 @@ use warnings;
 use utf8::all;
 use Anki::Corpus;
 use Term::ReadKey;
-use Clipboard;
 
 die "usage: $0 query\n" unless @ARGV;
 
@@ -13,19 +12,25 @@ END { ReadMode 0 }
 
 my $corpus = Anki::Corpus->new;
 
+sub copy {
+    my $text = shift;
+    open my $handle, '| pbcopy';
+    print $handle $text;
+    close $handle;
+    say "Copied: $text";
+}
+
 my %commands = (
     "s" => sub { $corpus->suspend_sentence(shift) },
     "u" => sub { $corpus->unsuspend_sentence(shift) },
     "q" => sub { exit },
     "N" => sub {
         my ($id, $sentence, $translation, $readings, $source) = @_;
-        Clipboard->copy($sentence);
-        say "Copied: $sentence";
+        copy($sentence);
     },
     "S" => sub {
         my ($id, $sentence, $translation, $readings, $source) = @_;
-        Clipboard->copy($source);
-        say "Copied: $source";
+        copy($source);
     },
 );
 my $commands = join '', sort keys %commands;
