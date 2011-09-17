@@ -279,7 +279,7 @@ sub suspend_sentence {
     my $id = shift;
 
     my $dbh = $self->dbh;
-    $dbh->do("UPDATE sentences SET suspended=1 WHERE rowid=?", {}, $id);
+    $dbh->do("UPDATE sentences SET unsuspended=0 WHERE rowid=?", {}, $id);
 }
 
 sub unsuspend_sentence {
@@ -287,7 +287,7 @@ sub unsuspend_sentence {
     my $id = shift;
 
     my $dbh = $self->dbh;
-    $dbh->do("UPDATE sentences SET suspended=0 WHERE rowid=?", {}, $id);
+    $dbh->do("UPDATE sentences SET unsuspended=1 WHERE rowid=?", {}, $id);
 }
 
 no Any::Moose;
