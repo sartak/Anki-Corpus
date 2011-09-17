@@ -248,5 +248,21 @@ sub scan_for {
     return $count;
 }
 
+sub suspend_sentence {
+    my $self = shift;
+    my $id = shift;
+
+    my $dbh = $self->dbh;
+    $dbh->do("UPDATE sentences SET suspended=1 WHERE rowid=?", {}, $id);
+}
+
+sub unsuspend_sentence {
+    my $self = shift;
+    my $id = shift;
+
+    my $dbh = $self->dbh;
+    $dbh->do("UPDATE sentences SET suspended=0 WHERE rowid=?", {}, $id);
+}
+
 1;
 
