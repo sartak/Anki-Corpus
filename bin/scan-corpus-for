@@ -35,20 +35,21 @@ my $cb = sub {
     my %args     = @_;
     my $sentence = $args{sentence};
     my $regex    = $args{regex};
-
-    print "\e[2J";
+    my $index    = $args{index};
+    my $count    = $args{count};
 
     while (1) {
         $corpus->print_sentence($sentence, $regex);
 
         local $commands{j} = sub {
             last;
-        } if ${ $args{next} } < $args{count};
+        } if ${ $args{next} } < $count;
 
+        my $back_one = $index - 1;
         local $commands{k} = sub {
-            ${ $args{next} } -= 2;
+            ${ $args{next} } = $back_one;
             last;
-        } if ${ $args{next} } - 2 >= 0;
+        } if $back_one >= 0;
 
         delete local $commands{H} unless $sentence->has_translation;
         delete local $commands{Y} unless $sentence->has_readings;
@@ -56,7 +57,7 @@ my $cb = sub {
 
         my $commands = join '', sort keys %commands;
         local $| = 1;
-        print "{$args{index}/$args{count}} Command [$commands]: ";
+        print "[".($index+1)."/$count] Command [$commands]: ";
 
         my $command = ReadKey 0;
         do { ReadMode 0; exit } if !defined($command);
