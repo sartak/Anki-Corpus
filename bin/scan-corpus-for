@@ -41,6 +41,7 @@ my $cb = sub {
     print "\e[2J";
 
     while (1) {
+        print "\n";
         $corpus->print_sentence(@_);
 
         local $| = 1;
@@ -49,7 +50,6 @@ my $cb = sub {
         my $command = ReadKey 0;
         exit if !defined($command);
         print "$command\n";
-        print "\n" if $command ne "\n";
         last if $command eq "\n" || $command eq " ";
 
         $commands{$command}->(@$fields);
