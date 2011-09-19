@@ -106,7 +106,7 @@ sub each_sentence {
     my $sub   = shift;
 
     my $sth = $self->prepare("
-        SELECT rowid, japanese, translation, readings, source, unsuspended
+        SELECT rowid, japanese, translation, readings, source, suspended
         FROM sentences
         $query
     ;");
@@ -117,13 +117,13 @@ sub each_sentence {
 
     while (my @results = $sth->fetchrow_array) {
         my $sentence = Anki::Corpus::Sentence->new(
-            corpus      =>  $self,
-            rowid       =>  $results[0],
-            japanese    =>  $results[1],
-            translation =>  $results[2],
-            readings    =>  $results[3],
-            source      =>  $results[4],
-            suspended   => !$results[5],
+            corpus      => $self,
+            rowid       => $results[0],
+            japanese    => $results[1],
+            translation => $results[2],
+            readings    => $results[3],
+            source      => $results[4],
+            suspended   => $results[5],
         );
         push @sentences, $sentence;
     }
