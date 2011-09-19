@@ -230,7 +230,7 @@ sub scan_for {
     my $self  = shift;
     my @args  = @{ shift() };
     my $cb    = shift;
-    my $query = shift || 'WHERE ';
+    my $query = shift || 'WHERE 1';
 
     my $order = join ", ", map { "source='$_' DESC" } (
         'MFSP',
