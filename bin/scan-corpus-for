@@ -14,11 +14,11 @@ END { ReadMode 0 }
 my $corpus = Anki::Corpus->new;
 
 sub copy {
-    my $text = shift;
+    my $text = shift || '';
     open my $handle, '| pbcopy';
     print $handle $text;
     close $handle;
-    say "Copied: $text";
+    say "Copied: $text" if $text;
 }
 
 sub run_applescript {
