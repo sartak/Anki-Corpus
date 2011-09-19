@@ -98,7 +98,7 @@ sub refresh {
     $self->_clear_notes;
 
     my $sth = $self->corpus->prepare("
-        SELECT japanese, translation, readings, source, unsuspended
+        SELECT japanese, translation, readings, source, suspended
         FROM sentences
         WHERE rowid=?
     ;");
@@ -107,9 +107,9 @@ sub refresh {
     my @results = @{ $sth->fetchall_arrayref->[0] || [] }
         or return;
 
-    $self->{japanese}    =  $results[0];
-    $self->{source}      =  $results[3];
-    $self->{suspended}   = !$results[4];
+    $self->{japanese}    = $results[0];
+    $self->{source}      = $results[3];
+    $self->{suspended}   = $results[4];
 
     delete $self->{translation};
     $self->{translation} = $results[1]
