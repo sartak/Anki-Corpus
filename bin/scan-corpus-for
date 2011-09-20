@@ -74,7 +74,7 @@ my %commands = (
         description => 'cut out all this nonsense',
         code        => sub { ReadMode 0; exit },
     },
-    "A" => {
+    "a" => {
         description => 'add to Anki',
         code        => sub { add_to_anki(shift) },
     },
