@@ -34,6 +34,7 @@ sub add_to_anki {
     my $applescript = << '    EOAS';
         tell application "Anki"
             activate
+            delay 0.2
             tell application "System Events"
                 tell process "Anki"
                     keystroke "v" using command down
