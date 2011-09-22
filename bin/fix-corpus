@@ -62,3 +62,12 @@ $corpus->each_sentence('WHERE source="プログレッシブ英和・和英中辞
 
     $corpus->dbh->commit;
 });
+
+$corpus->each_sentence('WHERE readings like "%<br%";', sub {
+    my $sentence = shift;
+
+    my $new_readings = $sentence->readings;
+    $new_readings =~ s/<br[^>]*>/\n/g;
+
+    $corpus->dbh->do("update sentences set readings=? where rowid=?", {}, $new_readings, $sentence->rowid);
+});
