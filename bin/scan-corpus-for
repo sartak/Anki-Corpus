@@ -55,7 +55,7 @@ sub add_to_anki {
     if ($sentence->source eq 'Twitter') {
         my $author = $sentence->note('作者');
         $source = $sentence->note('URL')
-               || $author ? ('@' . $author) : $source;
+               || ($author ? ('@' . $author) : $source);
     }
 
     $add_field->($sentence->japanese);    # 日本語
