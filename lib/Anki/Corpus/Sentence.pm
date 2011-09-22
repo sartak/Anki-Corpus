@@ -47,11 +47,15 @@ has suspended => (
 );
 
 has notes => (
+    traits  => ['Hash'],
     is      => 'ro',
     isa     => 'HashRef[Str]',
     lazy    => 1,
     builder => '_build_notes',
     clearer => '_clear_notes',
+    handles => {
+        note => 'get',
+    },
 );
 
 sub id { shift->rowid }
