@@ -57,6 +57,13 @@ sub add_sentence {
         $args{unsuspended} = time;
     }
 
+    for my $key ('japanese', 'translation', 'readings') {
+        if ($args{$key} =~ s/<br[^>]*>/\n/g) {
+            warn "Replaced <br>s in $key with newlines, giving $args{$key}\n";
+        }
+    }
+
+
     my $old_warn = $SIG{__WARN__} = sub { warn shift };
     local $SIG{__WARN__} = sub {
         my $warning = shift;
