@@ -47,15 +47,11 @@ has suspended => (
 );
 
 has notes => (
-    traits  => ['Hash'],
     is      => 'ro',
     isa     => 'HashRef[Str]',
     lazy    => 1,
     builder => '_build_notes',
     clearer => '_clear_notes',
-    handles => {
-        note => 'get',
-    },
 );
 
 sub id { shift->rowid }
@@ -71,6 +67,11 @@ override BUILDARGS => sub {
 sub _build_notes {
     my $self = shift;
     return { $self->corpus->notes_for($self->id) };
+}
+
+sub note {
+    my $self = shift;
+    return $self->notes->{shift(@_)};
 }
 
 sub suspend {
