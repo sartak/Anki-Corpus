@@ -11,6 +11,7 @@ die "usage: $0 query\n" unless @ARGV;
 ReadMode 3;
 END { ReadMode 0 }
 
+my $current_search = qr/./;
 my $corpus = Anki::Corpus->new;
 
 sub copy {
@@ -149,6 +150,20 @@ my %commands = (
             }
         },
     },
+    '/' => {
+        description => 'search',
+        code        => sub {
+            local $| = 1;
+            print "Search (currently /$current_search/): ";
+            ReadMode 0;
+            my $new_search = scalar readline STDIN;
+            chomp $new_search;
+            ReadMode 3;
+
+            $new_search = '.' if $new_search eq '';
+            $current_search = qr/$new_search/;
+        },
+    },
 );
 my $commands = join '', sort keys %commands;
 
@@ -158,6 +173,8 @@ my $cb = sub {
     my $regex    = $args{regex};
     my $index    = $args{index};
     my $count    = $args{count};
+
+    return unless $sentence->japanese =~ $current_search;
 
     while (1) {
         print "\n";
