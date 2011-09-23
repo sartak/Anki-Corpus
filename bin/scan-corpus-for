@@ -103,6 +103,52 @@ my %commands = (
         description => 'copy readings (読み)',
         code        => sub { copy(shift->readings) },
     },
+    "e" => {
+        description => 'edit sentence',
+        code        => sub {
+            my $sentence = shift;
+            local $| = 1;
+
+            while (1) {
+                my %triggers = (
+                    n => 'japanese',
+                    t => 'translation',
+                    s => 'source',
+                    r => 'readings',
+                );
+
+                for my $trigger (sort keys %triggers) {
+                    my $method = $triggers{$trigger};
+                    say "[$trigger] $method: " . ($sentence->$method // '(none)');
+                }
+                print "Edit which field: ";
+                my $key = ReadKey 0;
+                return if !defined($key) || $key eq 'q' || $key eq "\n";
+
+                say $key;
+
+                my $method = $triggers{$key};
+
+                if (!$method) {
+                    say "Invalid trigger '$key'";
+                    next;
+                }
+
+                say "Current: " . ($sentence->$method // '(none)');
+                print "New:     ";
+                ReadMode 0;
+                my $new = scalar readline STDIN;
+                chomp $new;
+                ReadMode 3;
+
+                return if !defined($new) || $new eq '';
+
+                $corpus->dbh->do("update sentences set $method=? where rowid=?", {}, $new, $sentence->rowid);
+
+                $sentence->refresh;
+            }
+        },
+    },
 );
 my $commands = join '', sort keys %commands;
 
