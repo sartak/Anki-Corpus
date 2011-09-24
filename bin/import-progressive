@@ -11,30 +11,58 @@ my $word = shift
 
 my $corpus = Anki::Corpus->new;
 my @sentences;
-my @needs_editing;
+my @forking_sentence;
+my @reading_sentence;
 my @ok;
 
 while (<STDIN>) {
     next unless /\S/;
 
     if (/［.*］/) {
-        push @needs_editing, $_;
+        push @forking_sentence, $_;
         next;
     }
+
+    if (/（.*）/) {
+        push @reading_sentence, $_;
+        next;
+    }
+
     push @ok, $_;
 }
 
-if (@needs_editing) {
-    push @ok, split /\n/, decode_utf8(Proc::InvokeEditor->edit(encode_utf8(join "\n", map { join "", $_, $_ } @needs_editing)));
+if (@forking_sentence) {
+    push @ok, split /\n/, decode_utf8(Proc::InvokeEditor->edit(encode_utf8(join "\n", map { join "", $_, $_ } @forking_sentence)));
 }
 
-for (@ok) {
-    next unless /\S/;
+if (@reading_sentence) {
+    my @output;
+    for (@reading_sentence) {
+        /（(.*?)）/;
+        push @output, "# $_", "【$1】";
+    }
 
-    my ($japanese, $translation) = split '｜', $_;
+    my @input = split /\n/, decode_utf8(Proc::InvokeEditor->edit(encode_utf8(join "\n", @output)));
+
+    while (my (undef, $readings) = splice @input, 0, 2) {
+        my $raw = shift @reading_sentence;
+        $raw =~ s/（(.*?)）//;
+
+        push @ok, {
+            raw      => $raw,
+            readings => $readings,
+        };
+    }
+}
+
+for my $line (@ok) {
+    my $raw = ref $line ? $line->{raw} : $line;
+    next unless $raw =~ /\S/;
+
+    my ($japanese, $translation) = split '｜', $raw;
 
     unless ($japanese && $translation) {
-        warn "Oddly formatted progressive line: $_\n";
+        warn "Oddly formatted progressive line: $raw\n";
         next;
     }
 
@@ -46,6 +74,7 @@ for (@ok) {
     push @sentences, {
         japanese    => $japanese,
         translation => $translation,
+        (ref $line ? (readings => $line->{readings}) : ()),
     };
 }
 
