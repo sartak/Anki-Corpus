@@ -71,3 +71,35 @@ $corpus->each_sentence('WHERE readings like "%<br%";', sub {
 
     $corpus->dbh->do("update sentences set readings=? where rowid=?", {}, $new_readings, $sentence->rowid);
 });
+
+my @errors;
+$corpus->each_sentence('WHERE source="プログレッシブ英和・和英中辞典" AND japanese LIKE "%（%）%";', sub {
+    my $sentence = shift;
+    push @errors, $sentence;
+});
+
+if (@errors) {
+    my @output;
+    for my $sentence (@errors) {
+        $sentence->japanese =~ /（(.*?)）/;
+        push @output,
+            "# " . $sentence->japanese,
+            "【$1】";
+    }
+
+    my @input = split /\n/, decode_utf8(Proc::InvokeEditor->edit(encode_utf8(join "\n", @output)));
+
+    for my $sentence (@errors) {
+        (my $new_japanese = $sentence->japanese) =~ s/（(.*?)）//;
+        my (undef, $reading) = splice @input, 0, 2;
+        $corpus->dbh->begin_work;
+
+        $corpus->dbh->do("UPDATE sentences SET japanese=?, readings=? WHERE rowid=?", {},
+            $new_japanese,
+            $reading,
+            $sentence->id,
+        );
+
+        $corpus->dbh->commit;
+    }
+}
