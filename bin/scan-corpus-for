@@ -13,6 +13,7 @@ END { ReadMode 0 }
 
 my $current_search = qr/./;
 my $corpus = Anki::Corpus->new;
+chomp(my $paste = `which paste-into-anki.scpt`);
 
 sub copy {
     my $text = shift || '';
@@ -22,13 +23,6 @@ sub copy {
     say "Copied: $text" if $text;
 }
 
-sub run_applescript {
-    my $applescript = shift;
-    open my $handle, '| osascript';
-    print $handle $applescript;
-    close $handle;
-}
-
 # THIS IS SO INCREDIBLY FRAGILE
 sub add_to_anki {
     my $sentence = shift;
@@ -36,8 +30,7 @@ sub add_to_anki {
     my $add_field = sub {
         my $text = shift;
         copy($text);
-        system('paste-into-anki.scpt');
-        run_applescript($applescript);
+        system("osascript $paste");
     };
 
     my $source = $sentence->source;
