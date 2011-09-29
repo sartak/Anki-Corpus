@@ -37,6 +37,10 @@ sub confirm {
 }
 
 my %commands = (
+    'q' => {
+        description => 'cut out all this nonsense',
+        code        => sub { ReadMode 0; exit },
+    },
     '.' => {
         description => 'commit sentence',
         code        => sub {
