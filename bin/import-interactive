@@ -102,8 +102,15 @@ for (['N' => \%all_sentences], ['n' => \%this_sentence]) {
     $commands{$trigger} = {
         description => $description,
         code        => sub {
-            my $type  = get_line("Note type: ");
+            my $type = get_line("Note type: ");
+            return unless defined($type) && $type ne '';
+
+            if (!$corpus->count_notes_of_type($type)) {
+                return unless confirm("Warning! There are no notes of type $type. Do you want to proceed?");
+            }
+
             my $value = get_line("$type value: ");
+            return unless defined($value) && $value ne '';
 
             push @{ $target->{notes} }, {
                 type  => $type,
