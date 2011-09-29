@@ -153,8 +153,6 @@ sub print_sentence {
     my $sentence    = shift;
     my $color_regex = shift;
 
-    say(($sentence->id . ": " . $sentence->japanese) =~ s/$color_regex/\e[1;35m$&\e[m/gr);
-
     my @fields;
 
     for (["翻訳", 'translation'], ["読み", 'readings'], ["起こり", 'source']) {
@@ -166,6 +164,7 @@ sub print_sentence {
     my %notes = %{ $sentence->notes };
     push @fields, map { [$_, $notes{$_} ] } sort keys %notes;
 
+    say(($sentence->id . ": " . $sentence->japanese) =~ s/$color_regex/\e[1;35m$&\e[m/gr);
     for (@fields) {
         my ($field, $value) = @$_;
         $value =~ s/\n/\n        /g;
