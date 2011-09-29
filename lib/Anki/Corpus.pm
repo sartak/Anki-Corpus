@@ -170,7 +170,19 @@ sub print_sentence {
     my %notes = %{ $sentence->notes };
     push @fields, map { [$_, $notes{$_} ] } sort keys %notes;
 
-    say(($sentence->id . ": " . $sentence->japanese) =~ s/$color_regex/\e[1;35m$&\e[m/gr);
+    my $japanese = $sentence->japanese;
+
+    if (my $kanji = $sentence->readings || $sentence->intuited_readings) {
+        $kanji =~ s/\P{Han}//g;
+        $kanji = $kanji ? "[$kanji]" : "(?!)";
+        $kanji = qr/$kanji/;
+
+        $japanese = join '',
+            map { (/\p{Han}/ && $_ !~ $kanji) ? "\e[37m$_\e[m" : $_ }
+            split '', $japanese;
+    }
+
+    say(($sentence->id . ": $japanese") =~ s/$color_regex/\e[1;35m$&\e[m/gr);
     for (@fields) {
         my ($field, $value) = @$_;
         $value =~ s/\n/\n        /g;
