@@ -1,0 +1,178 @@
+#!/usr/bin/env perl
+use 5.14.0;
+use warnings;
+use utf8::all;
+use Encode qw/encode_utf8 decode_utf8/;
+use Anki::Corpus;
+use Proc::InvokeEditor;
+use Term::ReadKey;
+
+ReadMode 3;
+END { ReadMode 0 }
+
+my $corpus = Anki::Corpus->new;
+
+my %all_sentences;
+my %this_sentence;
+
+sub get_line {
+    my $prompt = shift;
+    local $| = 1;
+    print $prompt;
+
+    ReadMode 0;
+    my $line = scalar readline STDIN;
+    chomp $line;
+    ReadMode 3;
+
+    return $line;
+}
+
+sub confirm {
+    my $prompt = shift;
+    local $| = 1;
+    print "$prompt [yn] (n) ";
+
+    return ReadKey(0) =~ /y/i;
+}
+
+my %commands = (
+    '.' => {
+        description => 'commit sentence',
+        code        => sub {
+            my %fields = (%all_sentences, %this_sentence);
+
+            my @notes = (@{ $all_sentences{notes} || [] }, @{ $this_sentence{notes} || [] });
+            delete $fields{notes};
+
+            %this_sentence = ();
+
+            my $id = $corpus->add_sentence(%fields);
+            if ($id) {
+                for my $note (@notes) {
+                    $corpus->add_note(
+                        %$note,
+                        sentence => $id,
+                    );
+                }
+            }
+        },
+    },
+);
+
+sub add_basic_command {
+    my $key   = shift;
+    my $field = shift;
+
+    for ([uc $key => \%all_sentences], [lc $key => \%this_sentence]) {
+        my ($trigger, $target) = @$_;
+        my $description = "set $field for " . ($target == \%all_sentences ? "all sentences" : "this sentence");
+
+        $commands{$trigger} = {
+            description => $description,
+            code        => sub {
+                my $prompt = $target->{$field} ? "\u$field [$target->{$field}]: " : "\u$field: ";
+                my $new = get_line($prompt);
+                return delete $target->{$field} unless defined($new) && $new ne '';
+                $target->{$field} = $new;
+            },
+        };
+    }
+}
+
+add_basic_command(j => 'japanese');
+add_basic_command(t => 'translation');
+add_basic_command(r => 'readings');
+add_basic_command(s => 'source');
+
+# Japanese must be unique
+delete $commands{J};
+
+for (['N' => \%all_sentences], ['n' => \%this_sentence]) {
+    my ($trigger, $target) = @$_;
+    my $description = "add note for " . ($target == \%all_sentences ? "all sentences" : "this sentence");
+
+    $commands{$trigger} = {
+        description => $description,
+        code        => sub {
+            my $type  = get_line("Note type: ");
+            my $value = get_line("$type value: ");
+
+            push @{ $target->{notes} }, {
+                type  => $type,
+                value => $value,
+            };
+        },
+    };
+}
+
+for (['C' => \%all_sentences], ['c' => \%this_sentence]) {
+    my ($trigger, $target) = @$_;
+    my $description = "clear notes for " . ($target == \%all_sentences ? "all sentences" : "this sentence");
+
+    $commands{$trigger} = {
+        description => $description,
+        code        => sub {
+            delete $target->{notes};
+        },
+    };
+}
+
+while (1) {
+    $commands{'?'} = {
+        description => 'get help',
+        code        => sub {
+            for my $key (sort keys %commands) {
+                say "$key: $commands{$key}{description}";
+            }
+        },
+    };
+
+    if (%all_sentences) {
+        say "";
+        say "All Sentences:";
+        for my $key (sort grep { $_ ne 'notes' } keys %all_sentences) {
+            my $shadowed = $this_sentence{$key} ? '*' : ' ';
+            say " $shadowed  $key: $all_sentences{$key}";
+        }
+        if ($all_sentences{notes}) {
+            say "    notes:";
+            for (@{ $all_sentences{notes} }) {
+                say "        $_->{type}: $_->{value}";
+            }
+        }
+    }
+
+    if (%this_sentence) {
+        say "";
+        say "This Sentence:";
+        for my $key (sort grep { $_ ne 'notes' } keys %this_sentence) {
+            say "    $key: $this_sentence{$key}";
+        }
+        if ($this_sentence{notes}) {
+            say "    notes:";
+            for (@{ $this_sentence{notes} }) {
+                say "        $_->{type}: $_->{value}";
+            }
+        }
+    }
+
+    say "";
+
+    my $commands = join '', sort keys %commands;
+    local $| = 1;
+    print "Command [$commands]: ";
+
+    my $command = ReadKey 0;
+    do { ReadMode 0; exit } if !defined($command);
+
+    print "$command\n";
+    next if $command eq "\n" || $command eq " ";
+
+    if (!exists($commands{$command})) {
+        say "Invalid command $command";
+        next;
+    }
+
+    $commands{$command}{code}->();
+}
