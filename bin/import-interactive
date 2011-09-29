@@ -14,6 +14,7 @@ my $corpus = Anki::Corpus->new;
 
 my %all_sentences;
 my %this_sentence;
+my %prev_sentence;
 
 sub get_line {
     my $prompt = shift;
@@ -44,9 +45,19 @@ my %commands = (
         description => 'cut out all this nonsense',
         code        => sub { ReadMode 0; exit },
     },
+    'z' => {
+        description => "add previous sentence as this sentence's context",
+        code        => {
+            push @{ $this_sentence{notes} }, {
+                type  => '前後関係',
+                value => $prev_sentence{japanese},
+            };
+        },
     '.' => {
         description => 'commit sentence',
         code        => sub {
+            %prev_sentence = %this_sentence;
+
             my %fields = (%all_sentences, %this_sentence);
 
             my @notes = (@{ $all_sentences{notes} || [] }, @{ $this_sentence{notes} || [] });
