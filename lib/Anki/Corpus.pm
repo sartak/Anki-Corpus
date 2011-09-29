@@ -247,6 +247,7 @@ sub scan_for {
     my $order = join ", ", map { "source='$_' DESC" } (
         'MFSP',
         'Smart.fm',
+        'ARES-3',
         'プログレッシブ英和・和英中辞典',
         '四字熟語',
         '四字熟語 Example',
