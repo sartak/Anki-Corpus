@@ -314,6 +314,15 @@ sub unsuspend_sentence {
     $dbh->do("UPDATE sentences SET suspended=0, unsuspended=NULL WHERE rowid=?", {}, $id);
 }
 
+sub count_notes_of_type {
+    my $self = shift;
+    my $type = shift;
+
+    my $sth = $self->prepare("SELECT count(*) FROM notes WHERE type=?");
+    $sth->execute($type);
+    return @{ $sth->fetchrow_arrayref }[0];
+}
+
 no Any::Moose;
 __PACKAGE__->meta->make_immutable;
 1;
