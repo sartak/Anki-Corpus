@@ -158,6 +158,12 @@ sub print_sentence {
     for (["翻訳", 'translation'], ["読み", 'readings'], ["起こり", 'source']) {
         my ($field, $method) = @$_;
         my $value = $sentence->$method;
+
+        if (!$value && $method eq 'readings') {
+            $field = $method = 'intuited_readings';
+            $value = $sentence->$method;
+        }
+
         push @fields, [$field, $value] if $value;
     }
 

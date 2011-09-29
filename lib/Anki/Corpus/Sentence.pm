@@ -127,6 +127,15 @@ sub refresh {
     return $self;
 }
 
+sub intuited_readings {
+    my $self = shift;
+
+    require Anki::Database;
+    my $anki = Anki::Database->new;
+
+    return $anki->readings_for($self->japanese);
+}
+
 no Any::Moose;
 __PACKAGE__->meta->make_immutable;
 1;
