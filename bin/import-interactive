@@ -33,7 +33,10 @@ sub confirm {
     local $| = 1;
     print "$prompt [yn] (n) ";
 
-    return ReadKey(0) =~ /y/i;
+    my $key = ReadKey(0);
+    say $key;
+
+    return $key =~ /y/i;
 }
 
 my %commands = (
