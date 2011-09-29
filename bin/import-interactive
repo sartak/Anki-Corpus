@@ -47,12 +47,13 @@ my %commands = (
     },
     'z' => {
         description => "add previous sentence as this sentence's context",
-        code        => {
+        code        => sub {
             push @{ $this_sentence{notes} }, {
                 type  => '前後関係',
                 value => $prev_sentence{japanese},
             };
         },
+    },
     '.' => {
         description => 'commit sentence',
         code        => sub {
