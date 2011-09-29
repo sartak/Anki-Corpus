@@ -147,7 +147,6 @@ my %commands = (
         },
     },
 );
-my $commands = join '', sort keys %commands;
 
 my $cb = sub {
     my %args     = @_;
