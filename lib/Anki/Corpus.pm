@@ -159,7 +159,7 @@ sub print_sentence {
         my ($field, $method) = @$_;
         my $value = $sentence->$method;
 
-        if (!$value && $method eq 'readings') {
+        if (!$value && $method eq 'readings' && !$ENV{DONT_INTUIT_READINGS}) {
             $field = $method = 'intuited_readings';
             $value = $sentence->$method;
         }
@@ -172,7 +172,7 @@ sub print_sentence {
 
     my $japanese = $sentence->japanese;
 
-    if (my $kanji = $sentence->readings || $sentence->intuited_readings) {
+    if (my $kanji = $sentence->readings || ($ENV{DONT_INTUIT_READINGS} ? "" : $sentence->intuited_readings)) {
         $kanji =~ s/\P{Han}//g;
         $kanji = $kanji ? "[$kanji]" : "(?!)";
         $kanji = qr/$kanji/;
