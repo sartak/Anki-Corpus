@@ -1,13 +1,21 @@
 package Anki::Corpus::Sentence;
 use 5.14.0;
 use warnings;
-use utf8;
+use utf8::all;
 use Any::Moose;
+use Anki::Morphology;
 
 has corpus => (
     is       => 'ro',
     isa      => 'Anki::Corpus',
     required => 1,
+);
+
+has morphology => (
+    is       => 'ro',
+    isa      => 'Anki::Morphology',
+    lazy     => 1,
+    default  => sub { Anki::Morphology->new(corpus => shift->corpus) },
 );
 
 has rowid => (
@@ -138,10 +146,7 @@ sub refresh {
 sub _build_intuited_readings {
     my $self = shift;
 
-    require Anki::Database;
-    my $anki = Anki::Database->new;
-
-    return $anki->readings_for($self->japanese);
+    return $self->morphology->readings_for($self->japanese);
 }
 
 no Any::Moose;
