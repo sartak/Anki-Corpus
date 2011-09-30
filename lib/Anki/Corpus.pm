@@ -250,11 +250,8 @@ sub notes_for {
     return %notes;
 }
 
-sub scan_for {
-    my $self  = shift;
-    my @args  = @{ shift() };
-    my $cb    = shift;
-    my $query = shift || 'WHERE 1';
+sub order {
+    my $self = shift;
 
     my $order = join ", ", map { "source='$_' DESC" } (
         'MFSP',
@@ -267,6 +264,16 @@ sub scan_for {
         # everything else
     );
     $order .= ', rowid ASC';
+    return $order;
+}
+
+sub scan_for {
+    my $self  = shift;
+    my @args  = @{ shift() };
+    my $cb    = shift;
+    my $query = shift || 'WHERE 1';
+
+    my $order = $self->order;
 
     my $color_regex = '(?!)';
     my @positive;
