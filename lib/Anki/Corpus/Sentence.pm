@@ -34,6 +34,14 @@ has readings => (
     predicate => 'has_readings',
 );
 
+has intuited_readings => (
+    is        => 'ro',
+    isa       => 'Str',
+    lazy      => 1,
+    predicate => 'has_intuited_readings',
+    builder   => '_build_intuited_readings',
+);
+
 has source => (
     is       => 'ro',
     isa      => 'Str',
@@ -127,7 +135,7 @@ sub refresh {
     return $self;
 }
 
-sub intuited_readings {
+sub _build_intuited_readings {
     my $self = shift;
 
     require Anki::Database;
