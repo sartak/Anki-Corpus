@@ -278,7 +278,9 @@ sub scan_for {
         }
         else {
             push @positive, $clause;
-            $color_regex .= "|\Q$clause\E";
+            my ($field, $value) = $clause =~ /^(\w+):(.+)/;
+            $value ||= $clause;
+            $color_regex .= "|\Q$value\E";
         }
     }
 
