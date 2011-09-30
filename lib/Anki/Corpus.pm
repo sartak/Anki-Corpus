@@ -283,10 +283,10 @@ sub scan_for {
     }
 
     if (@positive) {
-        $query .= ' AND (' . join (' OR ', map { "japanese LIKE '%$_%'" } @positive ) . ')';
+        $query .= ' AND (' . join (' OR ', map { /^(\w+):(.+)/ ? "$1 LIKE '%$2%'" : "japanese LIKE '%$_%'" } @positive ) . ')';
     }
     if (@negative) {
-        $query .= ' AND (' . join (' AND ', map { "japanese NOT LIKE '%$_%'" } @negative ) . ')';
+        $query .= ' AND (' . join (' AND ', map { /^(\w+):(.+)/ ? "$1 NOT LIKE '%$2%'" : "japanese NOT LIKE '%$_%'" } @negative ) . ')';
     }
 
     $query .= " ORDER BY $order";
