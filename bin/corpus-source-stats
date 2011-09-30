@@ -20,10 +20,15 @@ while (my ($source, $suspended, $count) = $sth->fetchrow_array) {
     }
 }
 
-for my $source (sort { $source{$b}{c} <=> $source{$a}{c} } keys %source) {
+for my $source (keys %source) {
+    $source{$source}{p} = ($source{$source}{u}||0) / $source{$source}{c};
+}
+
+for my $source ('ALL', sort { $source{$b}{p} <=> $source{$a}{p} } grep { $_ ne 'ALL' } keys %source) {
     my $count       = $source{$source}{c} || 0;
     my $suspended   = $source{$source}{s} || 0;
     my $unsuspended = $source{$source}{u} || 0;
+    my $percent     = $source{$source}{p} || 0;
 
-    say "$source: $count (U:$unsuspended + S:$suspended)";
+    say sprintf '%3d%%  %s: %d (U:%d + S:%d)', 100*$percent, $source, $count, $unsuspended, $suspended;
 }
