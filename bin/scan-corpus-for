@@ -211,10 +211,27 @@ my $cb = sub {
     }
 };
 
-my $count = $corpus->scan_for([@ARGV], $cb, 'WHERE suspended=1');
+if (join('', @ARGV) =~ /^\d+$/) {
+    my $order = $corpus->order;
+    my $query = "WHERE rowid in (" . join(", ", @ARGV) . ") ORDER BY $order";
 
-if (!$count) {
-    say "No suspended results, showing unsuspended rows";
-    $corpus->scan_for([@ARGV], $cb, 'WHERE suspended=0');
+    $corpus->each_sentence($query, sub {
+        my ($sentence, $index, $count, $next) = @_;
+        $cb->(
+            sentence => $sentence,
+            index    => $index,
+            count    => $count,
+            next     => $next,
+            regex    => qr/(?!)/,
+        );
+    });
+}
+else {
+    my $count = $corpus->scan_for([@ARGV], $cb, 'WHERE suspended=1');
+
+    if (!$count) {
+        say "No suspended results, showing unsuspended rows";
+        $corpus->scan_for([@ARGV], $cb, 'WHERE suspended=0');
+    }
 }
 
