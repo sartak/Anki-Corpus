@@ -37,7 +37,7 @@ has dbh => (
 sub add_sentence {
     my $self = shift;
     my %args = validate(@_, {
-        japanese    => { regex => qr/\p{Han}|\p{Hiragana}|\p{Katakana}/ },
+        japanese    => 1,
         translation => { default => '' },
         readings    => { default => '' },
         source      => 1,
