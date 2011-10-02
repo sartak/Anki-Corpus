@@ -50,8 +50,9 @@ sub add_sentence {
         warn "Truncated 。 giving $args{japanese}\n";
     }
 
-    if ($args{japanese} =~ s/\n/  /g) {
-        warn "Replaced literal newline with two spaces giving $args{japanese}\n";
+    if ($args{japanese} =~ s/\n|<br[^>]*>/  /g) {
+        warn "Replaced newlines with two spaces giving $args{japanese}\n";
+    }
     }
 
     warn "Length warning (" . length($args{japanese}) . "): $args{japanese}\n"
@@ -61,7 +62,7 @@ sub add_sentence {
         $args{unsuspended} = time;
     }
 
-    for my $key ('japanese', 'translation', 'readings') {
+    for my $key ('translation', 'readings') {
         if ($args{$key} =~ s/<br[^>]*>/\n/g) {
             warn "Replaced <br>s in $key with newlines, giving $args{$key}\n";
         }
