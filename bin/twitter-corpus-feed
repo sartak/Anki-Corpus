@@ -26,6 +26,8 @@ for my $status (reverse @$statuses) {
     # try to find just japanese (not chinese)
     next unless $text =~ /\p{Hiragana}|\p{Katakana}/;
 
+    $text =~ s/\n/  /g;
+
     my $id = $corpus->add_sentence(
         japanese => $text,
         source   => 'Twitter',
