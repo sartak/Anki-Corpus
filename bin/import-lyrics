@@ -1,0 +1,38 @@
+#!/usr/bin/env perl
+use 5.14.0;
+use warnings;
+use utf8::all;
+use Anki::Corpus;
+use Getopt::Whatever;
+
+my $corpus = Anki::Corpus->new;
+
+die "usage: $0 --artist=NAME --song=NAME"
+    unless $ARGV{artist} && $ARGV{song} && !@ARGV;
+
+while (<STDIN>) {
+    next unless /\S/;
+    s/^\s+//;
+    s/\s+$//;
+
+    $corpus->dbh->begin_work;
+
+    my $id = $corpus->add_sentence(
+        source   => '歌詞',
+        japanese => $_,
+    );
+    if ($id) {
+        $corpus->add_note(
+            sentence => $id,
+            type     => '歌',
+            value    => $ARGV{song},
+        );
+        $corpus->add_note(
+            sentence => $id,
+            type     => 'アーティスト',
+            value    => $ARGV{artist},
+        );
+    }
+
+    $corpus->dbh->commit;
+}
