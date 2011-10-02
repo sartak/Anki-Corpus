@@ -257,6 +257,7 @@ sub order {
         'MFSP',
         'Smart.fm',
         'ARES-3',
+        '歌詞',
         'プログレッシブ英和・和英中辞典',
         '四字熟語',
         '四字熟語 Example',
