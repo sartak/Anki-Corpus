@@ -50,6 +50,10 @@ sub add_sentence {
         warn "Truncated 。 giving $args{japanese}\n";
     }
 
+    if ($args{japanese} =~ s/\n/  /g) {
+        warn "Replaced literal newline with two spaces giving $args{japanese}\n";
+    }
+
     warn "Length warning (" . length($args{japanese}) . "): $args{japanese}\n"
         if length($args{japanese}) > 500;
 
