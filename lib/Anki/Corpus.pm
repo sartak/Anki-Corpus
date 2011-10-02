@@ -53,6 +53,10 @@ sub add_sentence {
     if ($args{japanese} =~ s/\n|<br[^>]*>/  /g) {
         warn "Replaced newlines with two spaces giving $args{japanese}\n";
     }
+
+    if ($args{japanese} !~ /\p{Han}|\p{Hiragana}|\p{Katakana}/) {
+        warn "Skipping this sentence which apparently lacks Japanese: $args{japanese}\n";
+        return;
     }
 
     warn "Length warning (" . length($args{japanese}) . "): $args{japanese}\n"
