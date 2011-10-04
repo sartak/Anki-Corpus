@@ -40,6 +40,11 @@ sub add_to_anki {
         $source = $sentence->note('URL')
                || ($author ? ('@' . $author) : $source);
     }
+    elsif ($sentence->source eq '歌詞') {
+        my $artist = $sentence->note('アーティスト');
+        my $song = $sentence->note('歌');
+        $source = ($artist && $song) ? "$artist - $song" : $source;
+    }
 
     my $readings = $sentence->readings || $sentence->intuited_readings;
 
