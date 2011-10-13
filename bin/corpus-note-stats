@@ -1,0 +1,23 @@
+#!/usr/bin/env perl
+use 5.14.0;
+use warnings;
+use utf8::all;
+use Anki::Corpus;
+
+my $corpus = Anki::Corpus->new;
+my $sth = $corpus->prepare("
+    SELECT sentences.source, notes.type, count(*)
+    FROM sentences
+    JOIN notes on sentences.rowid = notes.sentence
+    GROUP BY sentences.source, notes.type
+    ORDER BY sentences.source
+;");
+$sth->execute;
+
+my $prev_source = '';
+while (my ($source, $note_type, $count) = $sth->fetchrow_array) {
+    say $source if $source ne $prev_source;
+    say "    $note_type: $count";
+
+    $prev_source = $source;
+}
