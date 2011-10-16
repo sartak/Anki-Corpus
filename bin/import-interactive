@@ -45,12 +45,30 @@ my %commands = (
         description => 'cut out all this nonsense',
         code        => sub { ReadMode 0; exit },
     },
+    'Z' => {
+        description => "add previous sentence and its context as this sentence's context",
+        code        => sub {
+            my $prev_context = (map { $_->{value } } grep { $_->{type} eq '前後関係' } @{ $prev_sentence{notes} })[0];
+
+            my $default = $prev_context
+                        ? "$prev_context\n$prev_sentence{japanese}"
+                        : $prev_sentence{japanese};
+
+            my $value = get_line("New context" . ($default ? "[$default]: " : ": ")) || $default;
+            push @{ $this_sentence{notes} }, {
+                type  => '前後関係',
+                value => $value,
+            };
+        },
+    },
     'z' => {
         description => "add previous sentence as this sentence's context",
         code        => sub {
+            my $default = $prev_sentence{japanese};
+            my $value = get_line("New context" . ($default ? "[$default]: " : ": ")) || $default;
             push @{ $this_sentence{notes} }, {
                 type  => '前後関係',
-                value => $prev_sentence{japanese},
+                value => $value,
             };
         },
     },
