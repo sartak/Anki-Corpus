@@ -12,6 +12,7 @@ ReadMode 3;
 END { ReadMode 0 }
 
 my $current_search = qr/./;
+my @blacklist;
 my $corpus = Anki::Corpus->new;
 chomp(my $paste = `which paste-into-anki.scpt`);
 
@@ -153,6 +154,20 @@ my %commands = (
             $current_search = qr/$new_search/;
         },
     },
+    '-' => {
+        description => 'blacklist',
+        code        => sub {
+            local $| = 1;
+            print "New blacklist regex: ";
+            ReadMode 0;
+            my $blackitem = scalar readline STDIN;
+            chomp $blackitem;
+            ReadMode 3;
+
+            push @blacklist, qr/$blackitem/
+                if $blackitem;
+        },
+    },
 );
 
 my $cb = sub {
@@ -162,7 +177,8 @@ my $cb = sub {
     my $index    = $args{index};
     my $count    = $args{count};
 
-    return unless $sentence->japanese =~ $current_search;
+    return unless $sentence->japanese =~ $current_search
+              and 0 == grep { $sentence->japanese =~ $_ } @blacklist;
 
     while (1) {
         print "\n";
@@ -212,6 +228,12 @@ my $cb = sub {
         }
 
         $commands{$command}{code}->($sentence);
+
+        # chances are if we're blacklisting we want to skip the current sentence
+        last if $command eq '-'
+             && @blacklist
+             && $sentence->japanese =~ $blacklist[-1];
+
         $sentence->refresh;
     }
 };
