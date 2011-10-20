@@ -6,6 +6,7 @@ use Any::Moose;
 use DBI;
 use Params::Validate 'validate';
 use Anki::Corpus::Sentence;
+use Anki::Morphology;
 
 # ABSTRACT: interact with a corpus of sentences for Anki
 
@@ -32,6 +33,13 @@ has dbh => (
         $dbh
     },
     handles => ['prepare'],
+);
+
+has morphology => (
+    is       => 'ro',
+    isa      => 'Anki::Morphology',
+    lazy     => 1,
+    default  => sub { Anki::Morphology->new(corpus => shift) },
 );
 
 sub add_sentence {

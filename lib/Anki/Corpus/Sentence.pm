@@ -3,19 +3,12 @@ use 5.14.0;
 use warnings;
 use utf8::all;
 use Any::Moose;
-use Anki::Morphology;
 
 has corpus => (
     is       => 'ro',
     isa      => 'Anki::Corpus',
     required => 1,
-);
-
-has morphology => (
-    is       => 'ro',
-    isa      => 'Anki::Morphology',
-    lazy     => 1,
-    default  => sub { Anki::Morphology->new(corpus => shift->corpus) },
+    handles  => [qw/morphology/],
 );
 
 has rowid => (
