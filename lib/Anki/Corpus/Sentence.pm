@@ -49,7 +49,7 @@ has source => (
     required => 1,
 );
 
-has morphemes => (
+has _morphemes => (
     is      => 'ro',
     isa     => 'ArrayRef[Str]',
     lazy    => 1,
@@ -140,9 +140,9 @@ sub refresh {
     $self->{readings} = $results[2]
         if defined $results[2] && $results[2] ne '';
 
-    delete $self->{morphemes};
+    delete $self->{_morphemes};
     if ($results[4]) {
-        $self->{morphemes} = [ split ' ', $results[4] ];
+        $self->{_morphemes} = [ split ' ', $results[4] ];
     }
 
     return $self;
@@ -159,6 +159,7 @@ sub _build_morphemes {
     return [ map { $_->{dictionary} } $self->morphology->morphemes_of($self->japanese) ];
 }
 
+sub morphemes { @{ shift->_morphemes || [] } }
 
 no Any::Moose;
 __PACKAGE__->meta->make_immutable;
