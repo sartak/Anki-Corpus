@@ -80,6 +80,8 @@ sub add_sentence {
         }
     }
 
+    my @morphemes = map { $_->{dictionary} } $self->morphology->morphemes_of($args{japanese});
+    $args{morphemes} = @morphemes == 0 ? '' : ' ' . join(' ', @morphemes) . ' ';
 
     my $old_warn = $SIG{__WARN__} = sub { warn shift };
     local $SIG{__WARN__} = sub {
@@ -88,11 +90,12 @@ sub add_sentence {
     };
 
     my $dbh = $self->dbh;
-    my $ok = $dbh->do("INSERT INTO sentences (japanese, translation, readings, source, suspended, created, unsuspended) values (?, ?, ?, ?, ?, ?, ?);", {},
+    my $ok = $dbh->do("INSERT INTO sentences (japanese, translation, readings, source, morphemes, suspended, created, unsuspended) values (?, ?, ?, ?, ?, ?, ?);", {},
         $args{japanese},
         $args{translation},
         $args{readings},
         $args{source},
+        $args{morphemes},
         $args{suspended},
         $args{created},
         $args{unsuspended},
@@ -131,7 +134,7 @@ sub each_sentence {
     my $sub   = shift;
 
     my $sth = $self->prepare("
-        SELECT rowid, japanese, translation, readings, source, suspended
+        SELECT rowid, japanese, translation, readings, source, morphemes, suspended
         FROM sentences
         $query
     ;");
@@ -141,6 +144,11 @@ sub each_sentence {
     my @sentences;
 
     while (my @results = $sth->fetchrow_array) {
+        my $morphemes;
+        if ($results[5]) {
+            $morphemes = [ split ' ', $results[5] ];
+        }
+
         my $sentence = Anki::Corpus::Sentence->new(
             corpus      => $self,
             rowid       => $results[0],
@@ -148,7 +156,8 @@ sub each_sentence {
             translation => $results[2],
             readings    => $results[3],
             source      => $results[4],
-            suspended   => $results[5],
+            suspended   => $results[6],
+            (defined($morphemes) ? (morphemes => $morphemes) : ()),
         );
         push @sentences, $sentence;
     }

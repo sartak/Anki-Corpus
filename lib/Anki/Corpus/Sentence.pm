@@ -49,6 +49,13 @@ has source => (
     required => 1,
 );
 
+has morphemes => (
+    is      => 'ro',
+    isa     => 'ArrayRef[Str]',
+    lazy    => 1,
+    builder => '_build_morphemes',
+);
+
 has suspended => (
     is       => 'ro',
     isa      => 'Bool',
@@ -112,7 +119,7 @@ sub refresh {
     $self->_clear_notes;
 
     my $sth = $self->corpus->prepare("
-        SELECT japanese, translation, readings, source, suspended
+        SELECT japanese, translation, readings, source, morphemes, suspended
         FROM sentences
         WHERE rowid=?
     ;");
@@ -123,7 +130,7 @@ sub refresh {
 
     $self->{japanese}    = $results[0];
     $self->{source}      = $results[3];
-    $self->{suspended}   = $results[4];
+    $self->{suspended}   = $results[5];
 
     delete $self->{translation};
     $self->{translation} = $results[1]
@@ -133,6 +140,11 @@ sub refresh {
     $self->{readings} = $results[2]
         if defined $results[2] && $results[2] ne '';
 
+    delete $self->{morphemes};
+    if ($results[4]) {
+        $self->{morphemes} = [ split ' ', $results[4] ];
+    }
+
     return $self;
 }
 
@@ -141,6 +153,12 @@ sub _build_intuited_readings {
 
     return $self->morphology->readings_for($self->japanese);
 }
+
+sub _build_morphemes {
+    my $self = shift;
+    return [ map { $_->{dictionary} } $self->morphology->morphemes_of($self->japanese) ];
+}
+
 
 no Any::Moose;
 __PACKAGE__->meta->make_immutable;
