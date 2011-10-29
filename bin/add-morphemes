@@ -1,0 +1,26 @@
+#!/usr/bin/env perl
+use 5.14.0;
+use warnings;
+use utf8::all;
+use Anki::Corpus;
+
+my ($i, $e) = (0, 0);
+
+my $corpus = Anki::Corpus->new;
+my $morphology = $corpus->morphology;
+
+$corpus->each_sentence('WHERE morphemes IS NULL;', sub {
+    my $sentence = shift;
+    say 2**$e++ if ++$i == 2**$e;
+
+    my @morphemes = map { $_->{dictionary} } $morphology->morphemes_of($sentence->japanese);
+    my $morphemes = @morphemes == 0 ? '' : ' ' . join(' ', @morphemes) . ' ';
+
+    $corpus->dbh->begin_work;
+    $corpus->dbh->do("UPDATE sentences SET morphemes=? WHERE rowid=?", {},
+        $morphemes,
+        $sentence->id,
+    );
+
+    $corpus->dbh->commit;
+});
