@@ -112,6 +112,7 @@ sub schematize {
             translation TEXT,
             readings TEXT,
             source TEXT NOT NULL,
+            morphemes TEXT,
             suspended BOOLEAN,
             created INTEGER NOT NULL,
             unsuspended INTEGER
