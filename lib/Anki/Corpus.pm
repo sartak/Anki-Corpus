@@ -80,8 +80,7 @@ sub add_sentence {
         }
     }
 
-    my @morphemes = map { $_->{dictionary} } $self->morphology->morphemes_of($args{japanese});
-    $args{morphemes} = @morphemes == 0 ? '' : ' ' . join(' ', @morphemes) . ' ';
+    $args{morphemes} = $self->morpheme_string_for($args{japanese});
 
     my $old_warn = $SIG{__WARN__} = sub { warn shift };
     local $SIG{__WARN__} = sub {
@@ -360,6 +359,16 @@ sub count_notes_of_type {
     my $sth = $self->prepare("SELECT count(*) FROM notes WHERE type=?");
     $sth->execute($type);
     return @{ $sth->fetchrow_arrayref }[0];
+}
+
+sub morpheme_string_for {
+    my $self     = shift;
+    my $japanese = shift;
+
+    my @morphemes = map { $_->{dictionary} } $self->morphology->morphemes_of($japanese);
+    my $morphemes = @morphemes == 0 ? '' : ' ' . join(' ', @morphemes) . ' ';
+
+    return $morphemes;
 }
 
 no Any::Moose;

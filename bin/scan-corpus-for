@@ -137,8 +137,7 @@ my %commands = (
                 $corpus->begin_work;
                 $corpus->dbh->do("update sentences set $method=? where rowid=?", {}, $new, $sentence->rowid);
                 if ($method eq 'japanese') {
-                    my @morphemes = map { $_->{dictionary} } $corpus->morphology->morphemes_of($new);
-                    my $morphemes = @morphemes == 0 ? '' : ' ' . join(' ', @morphemes) . ' ';
+                    my $morphemes = $corpus->morpheme_string_for($new);
                     $corpus->dbh->do("update sentences set morphemes=? where rowid=?", {}, $morphemes, $sentence->rowid);
                 }
                 $corpus->commit;
