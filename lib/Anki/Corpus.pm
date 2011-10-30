@@ -89,7 +89,7 @@ sub add_sentence {
     };
 
     my $dbh = $self->dbh;
-    my $ok = $dbh->do("INSERT INTO sentences (japanese, translation, readings, source, morphemes, suspended, created, unsuspended) values (?, ?, ?, ?, ?, ?, ?);", {},
+    my $ok = $dbh->do("INSERT INTO sentences (japanese, translation, readings, source, morphemes, suspended, created, unsuspended) values (?, ?, ?, ?, ?, ?, ?, ?);", {},
         $args{japanese},
         $args{translation},
         $args{readings},
