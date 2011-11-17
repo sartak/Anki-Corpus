@@ -119,11 +119,20 @@ sub schematize {
             created INTEGER NOT NULL,
             unsuspended INTEGER
         );
+
         CREATE TABLE notes (
             sentence INTEGER NOT NULL,
             type TEXT NOT NULL,
             value TEXT NOT NULL
         );
+
+        CREATE TABLE morphemes (
+            sentence INTEGER NOT NULL,
+            surface TEXT NOT NULL,
+            dictionary TEXT NOT NULL,
+            type TEXT NOT NULL
+        );
+        CREATE INDEX morphemes_dictionary ON morphemes (dictionary);
     SCHEMA
 }
 
