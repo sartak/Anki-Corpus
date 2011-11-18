@@ -14,13 +14,7 @@ $corpus->each_sentence('LEFT JOIN morphemes ON (morphemes.sentence = sentences.r
     say 2**$e++ if ++$i == 2**$e;
 
     $corpus->dbh->begin_work;
-    for my $morpheme ($morphology->morphemes_of($sentence->japanese)) {
-        $corpus->dbh->do("
-            INSERT INTO morphemes
-            ('sentence', 'surface', 'dictionary', 'type')
-            VALUES (?, ?, ?, ?)
-        ;", {}, $sentence->rowid, $morpheme->{surface}, $morpheme->{dictionary}, $morpheme->{type});
-    }
+    $sentence->insert_standalone_morphemes;
 
     #$corpus->dbh->do("UPDATE sentences SET morphemes=? WHERE rowid=?", {},
     #    $corpus->morpheme_string_for($sentence->japanese),

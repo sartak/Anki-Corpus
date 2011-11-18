@@ -161,6 +161,18 @@ sub _build_morphemes {
 
 sub morphemes { @{ shift->_morphemes || [] } }
 
+sub insert_standalone_morphemes {
+    my $self = shift;
+
+    for my $morpheme ($self->morphology->morphemes_of($self->japanese)) {
+        $self->corpus->dbh->do("
+            INSERT INTO morphemes
+            ('sentence', 'surface', 'dictionary', 'type')
+            VALUES (?, ?, ?, ?)
+        ;", {}, $self->rowid, $morpheme->{surface}, $morpheme->{dictionary}, $morpheme->{type});
+    }
+}
+
 no Any::Moose;
 __PACKAGE__->meta->make_immutable;
 1;
