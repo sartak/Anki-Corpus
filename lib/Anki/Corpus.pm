@@ -54,6 +54,8 @@ sub add_sentence {
         unsuspended => { default => undef },
     });
 
+    $args{$_} =~ s/^\s+|\s+$//mg for qw/japanese translation readings source/;
+
     if ($args{japanese} =~ s/。$//) {
         warn "Truncated 。 giving $args{japanese}\n";
     }
@@ -61,6 +63,8 @@ sub add_sentence {
     if ($args{japanese} =~ s/\n|<br[^>]*>/  /g) {
         warn "Replaced newlines with two spaces giving $args{japanese}\n";
     }
+
+    $args{japanese} =~ s/^\s+|\s+$//mg for qw/japanese/;
 
     if ($args{japanese} !~ /\p{Han}|\p{Hiragana}|\p{Katakana}/) {
         warn "Skipping this sentence which apparently lacks Japanese: $args{japanese}\n";
@@ -77,6 +81,7 @@ sub add_sentence {
     for my $key ('translation', 'readings') {
         if ($args{$key} =~ s/<br[^>]*>/\n/g) {
             warn "Replaced <br>s in $key with newlines, giving $args{$key}\n";
+            $args{$key} =~ s/^\s+|\s+$//mg;
         }
     }
 
@@ -246,6 +251,8 @@ sub add_note {
         type     => 1,
         value    => 1,
     });
+
+    $args{value} =~ s/^\s+|\s+$//mg;
 
     my $dbh = $self->dbh;
     $dbh->do("INSERT INTO notes (sentence, type, value) values (?, ?, ?);", {},
