@@ -6,18 +6,29 @@ use Anki::Corpus;
 
 my $corpus = Anki::Corpus->new;
 my $sth = $corpus->prepare("
-    SELECT sentences.source, notes.type, count(*)
+    SELECT sentences.source, notes.type, notes.value
     FROM sentences
     JOIN notes on sentences.rowid = notes.sentence
-    GROUP BY sentences.source, notes.type
-    ORDER BY sentences.source
+    ORDER BY sentences.source, notes.type
 ;");
 $sth->execute;
 
-my $prev_source = '';
-while (my ($source, $note_type, $count) = $sth->fetchrow_array) {
-    say $source if $source ne $prev_source;
-    say "    $note_type: $count";
+my %all_notes;
+while (my ($source, $type, $value) = $sth->fetchrow_array) {
+    $all_notes{$source}{$type}{$value}++;
+}
 
-    $prev_source = $source;
+for my $source (sort keys %all_notes) {
+    say "$source:";
+
+    for my $type (sort keys %{ $all_notes{$source} }) {
+        my $notes = $all_notes{$source}{$type};
+        if (keys %$notes > 10) {
+            say "    $type: " . scalar(keys %$notes);
+        }
+        else {
+            say "    $type:";
+            say "        $_" . ($notes->{$_} > 1 ? " ($notes->{$_})" : "") for sort keys %$notes;
+        }
+    }
 }
