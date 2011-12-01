@@ -6,6 +6,10 @@ use Anki::Corpus;
 
 my $source = shift
     or die "usage: $0 source\n";
+my %notes;
+while (my ($type, $value) = splice @ARGV, 0, 2) {
+    $notes{$type} = $value;
+}
 
 my $corpus = Anki::Corpus->new;
 $_ = join "\n", <STDIN>;
@@ -48,11 +52,22 @@ while ($_) {
             $sentence =~ s/｜//g;
         }
 
-        $corpus->add_sentence(
+        $corpus->dbh->begin_work;
+        my $id = $corpus->add_sentence(
             japanese => $sentence,
             source   => $source,
             ($reading ? (readings => $reading) : ()),
         );
+        if ($id) {
+            for my $type (keys %notes) {
+                $corpus->add_note(
+                    sentence => $id,
+                    type     => $type,
+                    value    => $notes{$type},
+                );
+            }
+        }
+        $corpus->dbh->commit;
 
         say 2**$e++ if ++$i == 2**$e;
 
