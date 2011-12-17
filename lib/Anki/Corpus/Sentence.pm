@@ -109,6 +109,7 @@ sub delete {
 
     $dbh->do("DELETE FROM sentences WHERE rowid=?;", {}, $self->rowid);
     $dbh->do("DELETE FROM notes WHERE sentence=?;", {}, $self->rowid);
+    $dbh->do("DELETE FROM morphemes WHERE sentence=?;", {}, $self->rowid);
 
     $dbh->commit;
 }
