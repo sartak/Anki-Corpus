@@ -53,22 +53,12 @@ while ($_) {
             $sentence =~ s/｜//g;
         }
 
-        $corpus->dbh->begin_work;
-        my $id = $corpus->add_sentence(
+        $corpus->add_sentence(
             japanese => $sentence,
             source   => $source,
             ($reading ? (readings => $reading) : ()),
+            notes    => \%notes,
         );
-        if ($id) {
-            for my $type (keys %notes) {
-                $corpus->add_note(
-                    sentence => $id,
-                    type     => $type,
-                    value    => $notes{$type},
-                );
-            }
-        }
-        $corpus->dbh->commit;
 
         say 2**$e++ if ++$i == 2**$e;
 

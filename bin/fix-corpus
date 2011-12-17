@@ -40,21 +40,12 @@ $corpus->each_sentence('WHERE source="プログレッシブ英和・和英中辞
 
     for (@new_sentences) {
         my ($japanese, $translation) = split /｜/, $_;
-        my $id = $corpus->add_sentence(
+        $corpus->add_sentence(
             source      =>  'プログレッシブ英和・和英中辞典',
             japanese    => $japanese,
             translation => $translation,
+            notes       => \%notes,
         );
-
-        if (!$id) { die "insert failed" }
-
-        for my $type (keys %notes) {
-            $corpus->add_note(
-                sentence => $id,
-                type     => $type,
-                value    => $notes{$type},
-            );
-        }
     }
 
     $corpus->dbh->do("delete from notes where sentence=?", {}, $sentence->rowid);

@@ -15,24 +15,12 @@ while (<STDIN>) {
     s/^\s+//;
     s/\s+$//;
 
-    $corpus->dbh->begin_work;
-
-    my $id = $corpus->add_sentence(
+    $corpus->add_sentence(
         source   => '歌詞',
         japanese => $_,
+        notes    => {
+            '歌'           => $ARGV{song}
+            'アーティスト' => $ARGV{artist},
+        },
     );
-    if ($id) {
-        $corpus->add_note(
-            sentence => $id,
-            type     => '歌',
-            value    => $ARGV{song},
-        );
-        $corpus->add_note(
-            sentence => $id,
-            type     => 'アーティスト',
-            value    => $ARGV{artist},
-        );
-    }
-
-    $corpus->dbh->commit;
 }

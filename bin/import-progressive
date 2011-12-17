@@ -81,22 +81,12 @@ for my $line (@ok) {
 while (my $sentence = shift @sentences) {
     my $clarification = $1 if $sentence->{japanese} =~ s/\s*〔(.+)〕$//;
 
-    my $id = $corpus->add_sentence(
+    $corpus->add_sentence(
         source => 'プログレッシブ英和・和英中辞典',
         %$sentence,
+        notes => {
+            '見出し語' => $word,
+            ($clarification ? ('説明' => $clarification) : ()),
+        },
     );
-    if ($id) {
-        $corpus->add_note(
-            sentence => $id,
-            type     => '見出し語',
-            value    => $word,
-        );
-        if ($clarification) {
-            $corpus->add_note(
-                sentence => $id,
-                type     => '説明',
-                value    => $clarification,
-            );
-        }
-    }
 }

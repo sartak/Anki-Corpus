@@ -84,15 +84,7 @@ my %commands = (
 
             %this_sentence = ();
 
-            my $id = $corpus->add_sentence(%fields);
-            if ($id) {
-                for my $note (@notes) {
-                    $corpus->add_note(
-                        %$note,
-                        sentence => $id,
-                    );
-                }
-            }
+            $corpus->add_sentence(%fields, notes => \@notes);
         },
     },
 );
