@@ -42,7 +42,7 @@ has morphology => (
     default  => sub { Anki::Morphology->new(corpus => shift) },
 );
 
-sub add_sentence {
+sub _add_sentence {
     my $self = shift;
     my %args = validate(@_, {
         japanese    => 1,
@@ -106,6 +106,39 @@ sub add_sentence {
     );
     return unless $ok && defined wantarray;
     return ($dbh->selectrow_array("select max(rowid) from sentences;"))[0];
+}
+
+sub add_sentence {
+    my $self = shift;
+    my %args = @_;
+
+    my $notes = delete $args{notes};
+
+    $self->dbh->begin_work;
+
+    my $id = $self->_add_sentence(%args);
+    if ($id && $notes) {
+        if (ref($notes) eq 'ARRAY') {
+            for (@$notes) {
+                $self->add_note(
+                    %$_,
+                    sentence => $id,
+                );
+            }
+        }
+        elsif (ref($notes) eq 'HASH') {
+            for my $type (keys %$notes) {
+                $self->add_note(
+                    type     => $type,
+                    value    => $notes->{$type},
+                    sentence => $id,
+                );
+            }
+        }
+        else { confess "notes should be array or hash" }
+    }
+
+    $self->dbh->commit;
 }
 
 sub schematize {
