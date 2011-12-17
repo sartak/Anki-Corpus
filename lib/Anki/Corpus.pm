@@ -138,7 +138,12 @@ sub add_sentence {
         else { confess "notes should be array or hash" }
     }
 
+    my $sentence = $self->load_sentence($id);
+    $sentence->insert_standalone_morphemes;
+
     $self->dbh->commit;
+
+    return $sentence;
 }
 
 sub schematize {
