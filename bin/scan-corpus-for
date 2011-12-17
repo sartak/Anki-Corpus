@@ -136,13 +136,19 @@ my %commands = (
 
                 $corpus->dbh->begin_work;
                 $corpus->dbh->do("update sentences set $method=? where rowid=?", {}, $new, $sentence->rowid);
+                $sentence->refresh;
+
                 if ($method eq 'japanese') {
                     my $morphemes = $corpus->morpheme_string_for($new);
                     $corpus->dbh->do("update sentences set morphemes=? where rowid=?", {}, $morphemes, $sentence->rowid);
+                    $sentence->refresh;
+                    $corpus->dbh->do("delete from morphemes where sentence=?", {}, $sentence->rowid);
+                    $sentence->insert_standalone_morphemes;
+                    $sentence->refresh;
                 }
+
                 $corpus->dbh->commit;
 
-                $sentence->refresh;
             }
         },
     },
