@@ -174,6 +174,39 @@ sub schematize {
     SCHEMA
 }
 
+sub load_sentence {
+    my $self = shift;
+    my $id   = shift;
+
+    my $sth = $self->prepare("
+        SELECT rowid, japanese, translation, readings, source, morphemes, suspended
+        FROM sentences
+        WHERE rowid=?
+    ;");
+    $sth->execute($id);
+
+    while (my @results = $sth->fetchrow_array) {
+        my $morphemes;
+        if ($results[5]) {
+            $morphemes = [ split ' ', $results[5] ];
+        }
+
+        my $sentence = Anki::Corpus::Sentence->new(
+            corpus      => $self,
+            rowid       => $results[0],
+            japanese    => $results[1],
+            translation => $results[2],
+            readings    => $results[3],
+            source      => $results[4],
+            suspended   => $results[6],
+            (defined($morphemes) ? (morphemes => $morphemes) : ()),
+        );
+        return $sentence;
+    }
+
+    confess "invalid id $id";
+}
+
 sub each_sentence {
     my $self  = shift;
     my $query = shift;
