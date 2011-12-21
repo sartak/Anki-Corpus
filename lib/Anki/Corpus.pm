@@ -117,7 +117,12 @@ sub add_sentence {
     $self->dbh->begin_work;
 
     my $id = $self->_add_sentence(%args);
-    if ($id && $notes) {
+    if (!$id) {
+        $self->dbh->rollback;
+        return;
+    }
+
+    if ($notes) {
         if (ref($notes) eq 'ARRAY') {
             for (@$notes) {
                 $self->add_note(
