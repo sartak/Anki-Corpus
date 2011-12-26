@@ -46,6 +46,11 @@ sub add_to_anki {
         my $song = $sentence->note('歌');
         $source = ($artist && $song) ? "$artist - $song" : $source;
     }
+    elsif ($sentence->source eq '記事') {
+        my $magazine = $sentence->note('刊行');
+        my $article  = $sentence->note('題');
+        $source = "$magazine: $article";
+    }
 
     my $readings = $sentence->readings || $sentence->intuited_readings;
 
