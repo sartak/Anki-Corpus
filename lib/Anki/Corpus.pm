@@ -271,7 +271,7 @@ sub print_sentence {
 
     my @fields;
 
-    for (["翻訳", 'translation'], ["読み", 'readings'], ["起こり", 'source']) {
+    for (["読み", 'readings'], ["起こり", 'source']) {
         my ($field, $method) = @$_;
         my $value = $sentence->$method;
 
