@@ -57,7 +57,7 @@ sub add_to_anki {
     $add_field->($sentence->japanese);         # 日本語
     $add_field->($sentence->note("前後関係")); # 前後関係
     $add_field->('');                          # 定義
-    $add_field->($sentence->translation);      # 翻訳
+    $add_field->('');                          # 翻訳
     $add_field->($readings);                   # 読み
     $add_field->($source);                     # 出所
 }
