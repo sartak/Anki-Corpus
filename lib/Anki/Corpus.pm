@@ -181,6 +181,7 @@ sub schematize {
             type TEXT NOT NULL
         );
         CREATE INDEX morphemes_dictionary ON morphemes (dictionary);
+        CREATE INDEX sentences_source ON sentences (source);
     SCHEMA
 }
 
