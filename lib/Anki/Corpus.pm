@@ -60,6 +60,10 @@ sub _add_sentence {
         warn "Truncated 。 giving $args{japanese}\n";
     }
 
+    if ($args{japanese} =~ s/“|”/"/g) {
+        warn "Converted smart quotes giving $args{japanese}\n";
+    }
+
     if ($args{japanese} =~ s/\n|<br[^>]*>/  /g) {
         warn "Replaced newlines with two spaces giving $args{japanese}\n";
     }
