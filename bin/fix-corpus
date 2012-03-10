@@ -96,11 +96,13 @@ if (@errors) {
 }
 
 for my $field ('japanese', 'translation') {
-    $corpus->each_sentence(qq{WHERE $field LIKE "% " or $field LIKE " %";}, sub {
+    $corpus->each_sentence(qq{WHERE $field LIKE "% " or $field LIKE " %" or $field LIKE "%“%" or $field LIKE "%”%";}, sub {
         my $sentence = shift;
         say $sentence->id . "|$field: <" . $sentence->$field . ">";
 
         (my $new_value = $sentence->$field) =~ s/^\s+|\s+$//mg;
+        $new_value =~ s/“|”/"/g;
+
         $corpus->dbh->begin_work;
 
         $corpus->dbh->do("UPDATE sentences SET $field=? WHERE rowid=?", {},
