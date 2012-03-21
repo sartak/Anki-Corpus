@@ -19,7 +19,7 @@ while (<STDIN>) {
         source   => '歌詞',
         japanese => $_,
         notes    => {
-            '歌'           => $ARGV{song}
+            '歌'           => $ARGV{song},
             'アーティスト' => $ARGV{artist},
         },
     );
