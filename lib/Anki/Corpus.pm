@@ -32,7 +32,10 @@ has dbh => (
 
         $dbh
     },
-    handles => ['prepare'],
+    handles => {
+        prepare => 'prepare_cached',
+        do      => 'do',
+    },
 );
 
 has morphology => (
