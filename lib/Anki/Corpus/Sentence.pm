@@ -163,9 +163,10 @@ sub _build_morphemes {
 sub morphemes { @{ shift->_morphemes || [] } }
 
 sub insert_standalone_morphemes {
-    my $self = shift;
+    my $self      = shift;
+    my @morphemes = @{ shift || [ $self->morphology->morphemes_of($self->japanese) ] };
 
-    for my $morpheme ($self->morphology->morphemes_of($self->japanese)) {
+    for my $morpheme (@morphemes) {
         $self->corpus->dbh->do("
             INSERT INTO morphemes
             ('sentence', 'surface', 'dictionary', 'type')
