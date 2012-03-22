@@ -461,7 +461,7 @@ sub count_notes_of_type {
 sub morpheme_string_for {
     my $self     = shift;
     my $japanese = shift;
-    my @morphemes = map { $_->{dictionary} } @{ shift || $self->morphology->morphemes_of($japanese) };
+    my @morphemes = map { $_->{dictionary} } @{ shift || [ $self->morphology->morphemes_of($japanese) ] };
 
     my $morphemes = @morphemes == 0 ? '' : ' ' . join(' ', @morphemes) . ' ';
 
