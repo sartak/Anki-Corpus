@@ -69,7 +69,7 @@ sub _add_sentence {
 
     $args{japanese} =~ s/^\s+|\s+$//mg for qw/japanese/;
 
-    if ($args{japanese} !~ /\p{Han}|\p{Hiragana}|\p{Katakana}/) {
+    if ($args{japanese} !~ /\p{Unified_Ideograph}|\p{Hiragana}|\p{Katakana}/) {
         warn "Skipping this sentence which apparently lacks Japanese: $args{japanese}\n";
         return;
     }

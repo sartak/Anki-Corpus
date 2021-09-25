@@ -29,8 +29,8 @@ while ($_) {
 
     if (s/\A(.*?([。？！?!]|$))//m) {
         my $sentence = $1;
-        next unless $sentence =~ /\p{Han}|\p{Hiragana}|\p{Katakana}/;
-        $sentence =~ s/^[^\p{Han}|\p{Hiragana}|\p{Katakana}\s]*#\s*//; # code comments
+        next unless $sentence =~ /\p{Unified_Ideograph}|\p{Hiragana}|\p{Katakana}/;
+        $sentence =~ s/^[^\p{Unified_Ideograph}|\p{Hiragana}|\p{Katakana}\s]*#\s*//; # code comments
 
         die "Unknown character $1 in: $sentence"
             if $sentence =~ /([^\s\w、「」＜＞・。\-.！？『』（）()〝  〟／‥]<>)/;
